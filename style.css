@@ -466,7 +466,8 @@ h3 {
   line-height: 1.2;
 }
 
-.project-repo-link {
+.project-repo-link,
+.project-demo-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
