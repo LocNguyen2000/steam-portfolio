@@ -12,7 +12,7 @@
   --accent-strong: #43b5dd;
   --green: #62da9b;
   --radius: 13px;
-  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: "Roboto Mono", monospace;
   color: var(--text);
   background: var(--page);
   font-synthesis: none;
