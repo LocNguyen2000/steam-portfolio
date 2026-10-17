@@ -93,6 +93,43 @@ a:focus-visible {
   padding: 42px 44px 30px;
 }
 
+@keyframes profile-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html.motion-ready .avatar-wrap,
+html.motion-ready .profile-intro .eyebrow,
+html.motion-ready .profile-intro h1,
+html.motion-ready .profile-location,
+html.motion-ready .level-badge,
+html.motion-ready .profile-actions {
+  animation: profile-enter 550ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+html.motion-ready .profile-intro h1 {
+  animation-delay: 80ms;
+}
+
+html.motion-ready .profile-location {
+  animation-delay: 140ms;
+}
+
+html.motion-ready .level-badge {
+  animation-delay: 180ms;
+}
+
+html.motion-ready .profile-actions {
+  animation-delay: 240ms;
+}
+
 .avatar-wrap {
   position: relative;
   width: 156px;
@@ -102,6 +139,7 @@ a:focus-visible {
   border-radius: 22px;
   background: linear-gradient(145deg, #4eb8d5, #1a547b 60%, #16314e);
   box-shadow: 0 18px 44px rgb(0 0 0 / 40%);
+  transition: filter 240ms ease;
 }
 
 .profile-avatar {
@@ -125,10 +163,26 @@ a:focus-visible {
   bottom: 8px;
   width: 20px;
   height: 20px;
+  animation: status-pulse 2.4s ease-out infinite;
+}
+
+@keyframes status-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(98 218 155 / 0%);
+  }
+
+  50% {
+    box-shadow: 0 0 0 5px rgb(98 218 155 / 24%);
+  }
 }
 
 .profile-intro {
   max-width: 760px;
+}
+
+.profile-name-row {
+  margin-bottom: 12px;
 }
 
 .profile-name-row,
@@ -165,6 +219,18 @@ h1 {
   font-weight: 400;
   letter-spacing: -0.035em;
   line-height: 1.12;
+  transition: color 240ms ease, text-shadow 240ms ease;
+}
+
+@media (hover: hover) {
+  .profile-heading:hover .avatar-wrap {
+    filter: drop-shadow(0 0 9px rgb(114 200 234 / 36%));
+  }
+
+  .profile-heading:hover h1 {
+    color: #fff;
+    text-shadow: 0 0 18px rgb(114 200 234 / 22%);
+  }
 }
 
 .profile-location {
@@ -368,6 +434,16 @@ h2 {
   border: 1px solid rgba(159, 194, 216, 0.13);
   border-radius: 10px;
   background: rgb(5 15 25 / 48%);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+@media (hover: hover) {
+  .project-card:hover {
+    transform: translateY(-4px);
+    border-color: rgb(114 200 234 / 42%);
+    box-shadow: 0 14px 30px rgb(0 0 0 / 24%);
+  }
+
 }
 
 .project-art {
@@ -411,6 +487,45 @@ h2 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 350ms ease;
+}
+
+@media (hover: hover) {
+  .project-card:hover .project-art img {
+    transform: scale(1.045);
+  }
+}
+
+.motion-ready .reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 500ms ease,
+    transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.motion-ready .reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.motion-ready .project-grid .project-card:nth-child(2) {
+  transition-delay: 70ms;
+}
+
+.motion-ready .project-grid .project-card:nth-child(3) {
+  transition-delay: 140ms;
+}
+
+.motion-ready .project-grid .project-card:nth-child(4) {
+  transition-delay: 210ms;
+}
+
+.motion-ready .project-grid .project-card.reveal-on-scroll.is-visible:hover {
+  transform: translateY(-4px);
+  transition-delay: 0ms;
 }
 
 .project-art span {
@@ -977,6 +1092,13 @@ h3 {
   *::before,
   *::after {
     scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .motion-ready .reveal-on-scroll {
+    opacity: 1;
+    transform: none;
   }
 }

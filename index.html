@@ -46,10 +46,10 @@
                 <strong>15</strong>
               </div>
             </div>
-            <p class="profile-summary">
-              Full-stack software engineer building reliable products across
-              compliance, mobility, aviation, healthcare, and accounting.
-            </p>
+            <!-- <p class="profile-summary"> -->
+              <!-- Full-stack software engineer building reliable products across
+              compliance, mobility, aviation, healthcare, and accounting. -->
+            <!-- </p> -->
             <div class="profile-actions">
               <a class="button button-primary" href="#contact">Contact me</a>
               <a class="button button-secondary" href="./NguyenHuuLoc_Fullstack_2026.pdf">
@@ -97,7 +97,6 @@
                <article class="project-card project-monorepo">
                 <div class="project-art" aria-hidden="true">
                   <img src="./project-monorepo.png" alt="" />
-                  <span>03</span>
                 </div>
                 <div class="project-copy">
                   <p class="project-type">MICROSERVICE MONOREPO</p>
@@ -133,7 +132,6 @@
               <article class="project-card project-misa">
                 <div class="project-art" aria-hidden="true">
                   <img src="./project-misa.png" alt="" />
-                  <span>04</span>
                 </div>
                 <div class="project-copy">
                   <p class="project-type">FINANCE MANAGEMENT FRONTEND</p>
@@ -427,5 +425,34 @@
         <span>Built with a little Steam profile inspiration.</span>
       </footer>
     </div>
+    <script>
+      const revealTargets = document.querySelectorAll(
+        ".profile-layout .panel, .project-card",
+      );
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      if (!reduceMotion && "IntersectionObserver" in window) {
+        revealTargets.forEach((target) => {
+          target.classList.add("reveal-on-scroll");
+        });
+        document.documentElement.classList.add("motion-ready");
+
+        const revealObserver = new IntersectionObserver(
+          (entries, observer) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.12, rootMargin: "0px 0px -32px 0px" },
+        );
+
+        revealTargets.forEach((target) => revealObserver.observe(target));
+      }
+    </script>
   </body>
 </html>
