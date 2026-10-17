@@ -77,10 +77,17 @@ a:focus-visible {
   position: absolute;
   inset: 0 0 auto;
   height: 260px;
-  background:
-    linear-gradient(90deg, rgb(5 13 23 / 86%), rgb(5 13 23 / 45%) 68%, rgb(5 13 23 / 62%)),
-    linear-gradient(0deg, #0b1926 0%, rgb(11 25 38 / 5%) 75%),
-    url("./background.jpg") center 47% / cover;
+  /* background: url("./background.jpg") center 47% / cover; */
+}
+
+.profile-cover::after {
+  position: absolute;
+  inset: 0;
+  /* background:
+    linear-gradient(90deg, rgb(5 13 23 / 82%), rgb(5 13 23 / 42%) 68%, rgb(5 13 23 / 58%)),
+    linear-gradient(0deg, #0b1926 0%, rgb(11 25 38 / 15%) 75%);
+  content: ""; */
+  pointer-events: none;
 }
 
 .profile-heading {
@@ -949,6 +956,9 @@ h3 {
     grid-template-columns: minmax(0, 1fr) 250px;
     gap: 16px;
     padding: 20px;
+    background:
+      linear-gradient(rgb(8 17 29 / 80%), rgb(8 17 29 / 86%)),
+      url("./background.jpg") center / cover;
   }
 
   .panel {

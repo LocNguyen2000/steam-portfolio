@@ -27,7 +27,7 @@
   <body>
     <div class="site-shell">
       <header class="profile-header" id="intro">
-        <div class="profile-cover" aria-hidden="true"></div>
+        <div class="profile-cover" id="profile-cover"></div>
         <div class="profile-heading">
           <div class="avatar-wrap">
             <img class="profile-avatar" src="./profile.png" alt="Nguyen Huu Loc" />
@@ -433,7 +433,7 @@
         "(prefers-reduced-motion: reduce)",
       ).matches;
 
-      if (!reduceMotion && "IntersectionObserver" in window) {
+      if ("IntersectionObserver" in window) {
         revealTargets.forEach((target) => {
           target.classList.add("reveal-on-scroll");
         });
@@ -452,6 +452,31 @@
         );
 
         revealTargets.forEach((target) => revealObserver.observe(target));
+      }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.dots.min.js"></script>
+    <script>
+      if (
+        window.VANTA &&
+        typeof window.VANTA.DOTS === "function"
+      ) {
+        window.VANTA.DOTS({
+          el: "#profile-cover",
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200,
+          minWidth: 200,
+          scale: 1,
+          scaleMobile: 1,
+          color: 0x72c8ea,
+          color2: 0x14283a,
+          backgroundColor: 0x0b1926,
+          size: 2.2,
+          spacing: 22,
+          showLines: false,
+        });
       }
     </script>
   </body>
