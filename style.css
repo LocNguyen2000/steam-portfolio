@@ -90,6 +90,17 @@ a:focus-visible {
   pointer-events: none;
 }
 
+.gaming-page .profile-cover {
+  background:
+    linear-gradient(90deg, rgb(5 13 23 / 78%), rgb(5 13 23 / 44%) 68%, rgb(5 13 23 / 60%)),
+    linear-gradient(0deg, #0b1926 0%, rgb(11 25 38 / 15%) 75%),
+    url("./background.jpg") center 47% / cover;
+}
+
+.gaming-page .profile-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .profile-heading {
   position: relative;
   display: grid;
@@ -544,6 +555,31 @@ h2 {
   letter-spacing: 0.15em;
 }
 
+.content-art {
+  position: relative;
+  height: 112px;
+  align-items: center;
+  justify-content: center;
+}
+
+.content-art span {
+  color: rgb(232 240 247 / 82%);
+  font-size: 28px;
+  letter-spacing: 0;
+}
+
+.content-badminton .content-art {
+  background:
+    radial-gradient(ellipse at 70% 25%, rgb(135 203 137 / 35%), transparent 45%),
+    linear-gradient(130deg, #295448, #173c45 60%, #112536);
+}
+
+.content-code .content-art {
+  background:
+    radial-gradient(ellipse at 70% 25%, rgb(172 124 225 / 34%), transparent 45%),
+    linear-gradient(130deg, #49375f, #292d50 60%, #152638);
+}
+
 .project-copy {
   padding: 16px;
 }
@@ -956,9 +992,9 @@ h3 {
     grid-template-columns: minmax(0, 1fr) 250px;
     gap: 16px;
     padding: 20px;
-    background:
+    /* background:
       linear-gradient(rgb(8 17 29 / 80%), rgb(8 17 29 / 86%)),
-      url("./background.jpg") center / cover;
+      url("./background.jpg") center / cover; */
   }
 
   .panel {
