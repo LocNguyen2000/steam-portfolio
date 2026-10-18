@@ -16,7 +16,19 @@
           <p class="eyebrow">DEFEND YOUR TERRITORY</p>
           <h1 id="game-title">Tower <span>Defense</span></h1>
           <p class="menu-copy">Build your defenses, stop the waves, and protect the exit.</p>
+          <div class="level-select" role="group" aria-label="Choose a level">
+            <p class="level-select-title">Choose a level</p>
+            <div class="level-options">
+              <button class="level-option" type="button" data-level="1" aria-pressed="true">
+                <strong>Level 1</strong><small>Available</small>
+              </button>
+              <button class="level-option" type="button" data-level="2" aria-pressed="false" disabled>
+                <strong>Level 2</strong><small>Locked</small>
+              </button>
+            </div>
+          </div>
           <button id="start-button" class="primary-button">Start game</button>
+          <p class="high-score">High score <strong id="high-score">0</strong></p>
           <p class="controls-hint">Choose a tower, then click an open tile to place it.</p>
         </div>
       </section>
@@ -25,31 +37,29 @@
         <header class="topbar">
           <a class="brand" href="#" id="home-button" aria-label="Return to main menu">TD<span>.</span></a>
           <div class="stats" aria-live="polite">
-            <div class="stat"><span>WAVE</span><strong id="level">0</strong></div>
+            <div class="stat"><span>LEVEL</span><strong id="level">1</strong></div>
             <div class="stat"><span>GOLD</span><strong id="resources">200</strong></div>
             <div class="stat"><span>SCORE</span><strong id="score">0</strong></div>
             <div class="stat lives-stat"><span>LIVES</span><strong id="lives">20</strong></div>
-            <div class="stat timer-stat"><span>NEXT WAVE</span><strong id="timer">10s</strong></div>
+            <div class="stat timer-stat"><span>STARTS IN</span><strong id="timer">15s</strong></div>
           </div>
           <button id="sound-button" class="sound-button" type="button" aria-label="Mute sound">Sound on</button>
         </header>
 
         <div class="board-wrap">
-          <canvas id="board" width="1280" height="800" aria-label="Game map. Click an open tile to place the selected tower."></canvas>
-          <aside id="tower-info" class="tower-info" aria-live="polite" hidden>
-            <h2 id="tower-info-name"></h2>
-            <dl>
-              <div><dt>Build cost</dt><dd id="tower-info-cost"></dd></div>
-              <div><dt>Range</dt><dd id="tower-info-range"></dd></div>
-              <div><dt>Damage</dt><dd id="tower-info-damage"></dd></div>
-              <div><dt>Fire rate</dt><dd id="tower-info-speed"></dd></div>
-            </dl>
-          </aside>
+          <canvas id="board" width="1280" height="832" aria-label="Game map. Click an open tile to place the selected tower."></canvas>
+          <div id="level-start-warning" class="level-start-warning" role="status" hidden></div>
           <div id="game-over" class="game-over" hidden>
             <p class="eyebrow">DEFENSE FAILED</p>
             <h2>Your base was overrun</h2>
             <p>Final score <strong id="final-score">0</strong></p>
             <button id="restart-button" class="primary-button">Play again</button>
+          </div>
+          <div id="level-complete" class="game-over level-complete" hidden>
+            <p class="eyebrow">LEVEL CLEARED</p>
+            <h2 id="level-complete-title">Level complete!</h2>
+            <p id="level-complete-message"></p>
+            <button id="continue-button" class="primary-button">Continue</button>
           </div>
         </div>
 
@@ -71,6 +81,19 @@
               <kbd>3</kbd>
             </button>
           </div>
+          <aside id="tower-info" class="tower-info" aria-live="polite" hidden>
+            <h2 id="tower-info-name"></h2>
+            <dl>
+              <div><dt>Build cost</dt><dd id="tower-info-cost"></dd></div>
+              <div><dt>Range</dt><dd id="tower-info-range"></dd></div>
+              <div><dt>Damage</dt><dd id="tower-info-damage"></dd></div>
+              <div><dt>Fire rate</dt><dd id="tower-info-speed"></dd></div>
+            </dl>
+            <div class="tower-upgrades" hidden>
+              <button class="tower-upgrade" data-upgrade="machine" type="button"></button>
+              <button class="tower-upgrade" data-upgrade="sniper" type="button"></button>
+            </div>
+          </aside>
           <p id="status-message" class="status-message">Choose a tower to start building.</p>
         </footer>
       </section>
