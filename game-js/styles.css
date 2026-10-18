@@ -1,0 +1,395 @@
+:root {
+  color-scheme: dark;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #101820;
+  color: #e9f0f4;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 50% -20%, rgba(36, 84, 89, 0.32), transparent 58%),
+    #101820;
+}
+
+button {
+  font: inherit;
+}
+
+.app {
+  width: min(100%, 1440px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 24px clamp(12px, 3vw, 40px) 32px;
+}
+
+.screen[hidden],
+[hidden] {
+  display: none !important;
+}
+
+.menu-screen {
+  display: grid;
+  min-height: calc(100vh - 56px);
+  place-items: center;
+}
+
+.menu-card {
+  width: min(100%, 620px);
+  padding: clamp(32px, 7vw, 76px);
+  border: 1px solid rgba(150, 202, 202, 0.16);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(28, 44, 52, 0.94), rgba(19, 31, 38, 0.95));
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 16px;
+  color: #74d7b3;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.7rem, 9vw, 5rem);
+  letter-spacing: -0.07em;
+  line-height: 0.98;
+}
+
+h1 span {
+  color: #74d7b3;
+}
+
+.menu-copy {
+  max-width: 390px;
+  margin: 22px auto 30px;
+  color: #a9bac1;
+  line-height: 1.6;
+}
+
+.primary-button {
+  min-width: 190px;
+  padding: 14px 24px;
+  border: 0;
+  border-radius: 9px;
+  background: #53ce9c;
+  color: #0d211c;
+  cursor: pointer;
+  font-weight: 800;
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+  background: #76e4b7;
+}
+
+.controls-hint {
+  margin: 20px 0 0;
+  color: #82959e;
+  font-size: 0.85rem;
+}
+
+.game-screen {
+  display: block;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 74px;
+  margin: 0 auto 14px;
+}
+
+.brand {
+  color: #f1f6f7;
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: -0.09em;
+  text-decoration: none;
+}
+
+.brand span {
+  color: #74d7b3;
+}
+
+.stats {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  gap: clamp(12px, 3vw, 38px);
+}
+
+.stat {
+  display: grid;
+  gap: 3px;
+  min-width: 56px;
+}
+
+.stat span {
+  color: #82959e;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.stat strong {
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.lives-stat strong {
+  color: #ff8d83;
+}
+
+.sound-button {
+  padding: 9px 12px;
+  border: 1px solid #34464e;
+  border-radius: 8px;
+  background: #1a2a31;
+  color: #c5d3d7;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.board-wrap {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(169, 203, 203, 0.18);
+  border-radius: 10px;
+  background: #29c777;
+  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.3);
+}
+
+#board {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  cursor: crosshair;
+}
+
+.tower-info {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  left: 12px;
+  width: min(240px, calc(100% - 24px));
+  padding: 12px 14px;
+  border: 1px solid rgba(116, 215, 179, 0.5);
+  border-radius: 9px;
+  background: rgba(13, 25, 30, 0.92);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.tower-info h2 {
+  margin: 0 0 8px;
+  color: #74d7b3;
+  font-size: 0.95rem;
+}
+
+.tower-info dl {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  font-size: 0.76rem;
+}
+
+.tower-info dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tower-info dt {
+  color: #a9bac1;
+}
+
+.tower-info dd {
+  margin: 0;
+  color: #f1f6f7;
+  font-weight: 700;
+  text-align: right;
+}
+
+.board-wrap.building #board {
+  cursor: cell;
+}
+
+.game-over {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 24px;
+  background: rgba(8, 15, 19, 0.83);
+  text-align: center;
+  backdrop-filter: blur(5px);
+}
+
+.game-over h2 {
+  margin: 0;
+  font-size: clamp(1.7rem, 5vw, 3rem);
+}
+
+.game-over > p:not(.eyebrow) {
+  color: #b4c4c8;
+}
+
+.game-over strong {
+  color: #74d7b3;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 2px 0;
+}
+
+.tower-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tower-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 190px;
+  padding: 8px 12px 8px 8px;
+  border: 1px solid #34464e;
+  border-radius: 9px;
+  background: #19272e;
+  color: #e9f0f4;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.tower-option:hover,
+.tower-option[aria-pressed="true"] {
+  border-color: #65d5a9;
+  background: #203a39;
+}
+
+.tower-option img {
+  width: 42px;
+  height: 42px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.tower-option span {
+  display: grid;
+  gap: 3px;
+}
+
+.tower-option strong {
+  font-size: 0.83rem;
+}
+
+.tower-option small {
+  color: #9aadb3;
+  font-size: 0.68rem;
+}
+
+.tower-option kbd {
+  margin-left: auto;
+  color: #80939b;
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.status-message {
+  min-width: 180px;
+  margin: 0;
+  color: #9fb0b5;
+  font-size: 0.82rem;
+  text-align: right;
+}
+
+@media (max-width: 760px) {
+  .app {
+    padding: 12px 8px 22px;
+  }
+
+  .topbar {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .brand {
+    margin-right: auto;
+  }
+
+  .stats {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .stat {
+    min-width: 0;
+  }
+
+  .stat span {
+    font-size: 0.55rem;
+  }
+
+  .stat strong {
+    font-size: 0.95rem;
+  }
+
+  .toolbar {
+    display: block;
+  }
+
+  .tower-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tower-option {
+    min-width: 0;
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .tower-option img {
+    width: 34px;
+    height: 34px;
+  }
+
+  .tower-option small {
+    font-size: 0.59rem;
+  }
+
+  .tower-option kbd {
+    display: none;
+  }
+
+  .status-message {
+    min-height: 34px;
+    padding-top: 10px;
+    text-align: left;
+  }
+}

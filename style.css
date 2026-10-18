@@ -562,6 +562,12 @@ h2 {
   justify-content: center;
 }
 
+.content-tower-defense .content-art {
+  background:
+    radial-gradient(ellipse at 70% 25%, rgb(116 215 179 / 32%), transparent 45%),
+    linear-gradient(130deg, #285346, #193c3e 60%, #112536);
+}
+
 .content-art span {
   color: rgb(232 240 247 / 82%);
   font-size: 28px;
