@@ -45,13 +45,21 @@
       <div class="profile-layout">
         <main class="main-column gaming-content">
           <section class="panel gaming-note-panel" aria-labelledby="gaming-note-title">
-            <!-- <p class="eyebrow"></p> -->
             <h2 id="gaming-note-title">My relax station</h2>
-            <!-- Replace this paragraph with your own note. -->
             <p>Just a place for storing all the things that i love at this moments</p>
-            Add my steam profile: <a href="https://steamcommunity.com/profiles/76561198848937215/" target="_blank" rel="noreferrer">https://steamcommunity.com/id/locnguyen2k/</a> <br/>
-            My chess profile: <a href="https://www.chess.com/member/locnguyen2k" target="_blank" rel="noreferrer">https://www.chess.com/member/locnguyen2k</a> <br/> <br/>
-            Invite me for a game of chess, or just watch my gaming videos on YouTube. I also have a simple tower defense game built with HTML5 Canvas, converted from JavaFX game. Enjoy!</p> 
+            <p>
+              Add my steam profile:
+              <a href="https://steamcommunity.com/profiles/76561198848937215/" target="_blank" rel="noreferrer">https://steamcommunity.com/id/locnguyen2k/</a>
+            </p>
+            <p>
+              My chess profile:
+              <a href="https://www.chess.com/member/locnguyen2k" target="_blank" rel="noreferrer">https://www.chess.com/member/locnguyen2k</a>
+            </p>
+            <p>
+              Invite me for a game of chess, or just watch my gaming videos on
+              YouTube. I also have a simple tower defense game built with HTML5
+              Canvas, converted from JavaFX game. Enjoy!
+            </p>
           </section>
 
           <section class="panel" id="content">
@@ -60,96 +68,10 @@
                 <p class="eyebrow">PLAY · WATCH · READ</p>
                 <h2>From my gaming desk</h2>
               </div>
-              <span class="panel-count">05 ITEMS</span>
+              <span class="panel-count" data-content-count>Loading…</span>
             </div>
-            <div class="project-grid content-grid">
-              <article class="project-card content-tower-defense">
-                <div class="project-art content-art" aria-hidden="true">
-                  <img src="./images/blog-game-tdf.png" alt="" />
-                </div>
-                <div class="project-copy">
-                  <p class="project-type">BROWSER GAME</p>
-                  <h3>Tower Defense</h3>
-                  <p>My old gaming project, a simple tower defense game built with HTML5 Canvas, converted from JavaFX game.</p>
-                  <div class="tag-list"><span>Strategy</span><span>Canvas</span></div>
-                  <a
-                    class="project-demo-link"
-                    href="./game-js/index.html"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Play game <span aria-hidden="true">↗</span>
-                  </a>
-                </div>
-              </article>
-              <article class="project-card content-chess">
-                <div class="project-art content-art" aria-hidden="true">
-                  <img src="./images/blog-chess.png" alt="" />
-                </div>
-                <div class="project-copy">
-                  <p class="project-type">GAMING</p>
-                  <h3>Chess Game</h3>
-                  <p>Just a normal game of chess, nothing special.</p>
-                  <div class="tag-list"><span>Chess</span><span>Gaming</span></div>
-                  <a
-                    class="project-demo-link"
-                    href="https://www.chess.com/game/live/185410153140?username=locnguyen2k"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    View game <span aria-hidden="true">↗</span>
-                  </a>
-                </div>
-              </article>
-              <article class="project-card content-gaming">
-                <div class="project-art content-art" aria-hidden="true">
-                  <img src="./images/blog-game.png" alt="" />
-                </div>
-                <div class="project-copy">
-                  <p class="project-type">GAMING VIDEO</p>
-                  <h3>Gaming Content</h3>
-                  <p>A game of Rematch, bought on Steam and played with my friends.</p>
-                  <div class="tag-list"><span>Gaming</span><span>YouTube</span></div>
-                  <a
-                    class="project-demo-link"
-                    href="https://www.youtube.com/watch?v=VwIL-JUw7Uc"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Watch on YouTube <span aria-hidden="true">↗</span>
-                  </a>
-                </div>
-              </article>
-              <article class="project-card content-badminton">
-                <div class="project-art content-art" aria-hidden="true">
-                  <img src="./images/blog-badminton.png" alt="" />
-                </div>
-                <div class="project-copy">
-                  <p class="project-type">VIDEO</p>
-                  <h3>Badminton Video</h3>
-                  <p>I'm bad at badminton! Yes i said it.</p>
-                  <div class="tag-list"><span>Badminton</span><span>Video</span></div>
-                  <a
-                    class="project-demo-link"
-                    href="https://www.youtube.com/watch?v=s_Mj4oaLRSg"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Watch on YouTube <span aria-hidden="true">↗</span>
-                  </a>
-                </div>
-              </article>
-              <article class="project-card content-code">
-                <div class="project-art content-art" aria-hidden="true">
-                  <span>&lt;/&gt;</span>
-                </div>
-                <div class="project-copy">
-                  <p class="project-type">BLOG</p>
-                  <h3>Code Blog</h3>
-                  <p>Notes and posts about software development and coding.</p>
-                  <div class="tag-list"><span>Software</span><span>Writing</span></div>
-                </div>
-              </article>
+            <div class="project-grid content-grid" data-content-list aria-live="polite">
+              <p class="content-loading" role="status">Loading gaming and blog content…</p>
             </div>
           </section>
 
@@ -191,6 +113,7 @@
     <script src="./changelog.js"></script>
     <script src="./guestbook-config.js"></script>
     <script src="./guestbook.js"></script>
+    <script src="./gaming-content.js"></script>
     <script>
       const revealTargets = document.querySelectorAll(
         ".profile-layout .panel, .project-card",
