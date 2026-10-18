@@ -1,0 +1,46 @@
+<section class="panel guestbook-panel" aria-labelledby="guestbook-title">
+  <div class="panel-heading">
+    <div>
+      <p class="eyebrow">COMMUNITY BOARD</p>
+      <h2 id="guestbook-title">Digital guest book</h2>
+    </div>
+    <span class="panel-count">SAY HELLO</span>
+  </div>
+  <p class="guestbook-intro">
+    Leave a note, share what brought you here, or just say hello. Your name and
+    message will be visible to everyone, so please don’t include private information.
+  </p>
+  <form class="guestbook-form" data-guestbook-form>
+    <label for="guestbook-name">Name</label>
+    <input
+      id="guestbook-name"
+      name="name"
+      type="text"
+      maxlength="40"
+      autocomplete="name"
+      required
+    />
+    <label for="guestbook-message">Message</label>
+    <textarea
+      id="guestbook-message"
+      name="message"
+      rows="4"
+      maxlength="500"
+      required
+    ></textarea>
+    <div class="guestbook-form-footer">
+      <span class="guestbook-character-count" data-character-count>0 / 500</span>
+      <button class="button button-primary" type="submit" data-submit-button>
+        Sign guest book
+      </button>
+    </div>
+  </form>
+  <p class="guestbook-status" data-guestbook-status role="status" aria-live="polite"></p>
+  <div class="guestbook-entries">
+    <h3>Recent messages</h3>
+    <p class="guestbook-entries-status" data-entries-status role="status" aria-live="polite">
+      Loading messages…
+    </p>
+    <ol class="guestbook-list" data-guestbook-list></ol>
+  </div>
+</section>

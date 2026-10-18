@@ -873,6 +873,120 @@ h3 {
   list-style: none;
 }
 
+.guestbook-mount {
+  display: contents;
+}
+
+.guestbook-intro {
+  margin: -4px 0 18px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.guestbook-form {
+  display: grid;
+  gap: 8px;
+}
+
+.guestbook-form label {
+  color: #c5d3dc;
+  font-size: 11px;
+}
+
+.guestbook-form input,
+.guestbook-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 7px;
+  background: rgb(5 14 24 / 75%);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+}
+
+.guestbook-form input:focus,
+.guestbook-form textarea:focus {
+  border-color: var(--accent);
+  outline: 2px solid rgb(114 200 234 / 18%);
+  outline-offset: 1px;
+}
+
+.guestbook-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.guestbook-form-footer,
+.guestbook-entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.guestbook-character-count,
+.guestbook-entry time {
+  color: var(--dim);
+  font-size: 10px;
+}
+
+.guestbook-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.guestbook-status,
+.guestbook-entries-status {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.guestbook-entries {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--panel-border);
+}
+
+.guestbook-entries h3 {
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.guestbook-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guestbook-entry {
+  padding: 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 7px;
+  background: rgb(5 14 24 / 40%);
+}
+
+.guestbook-entry strong {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 11px;
+}
+
+.guestbook-entry p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
 .changelog-entry {
   position: relative;
   padding-left: 15px;
