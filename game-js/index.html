@@ -66,21 +66,34 @@
         <footer class="toolbar">
           <div class="tower-options" role="group" aria-label="Choose a tower to build">
             <button class="tower-option" data-tower="normal" type="button" aria-pressed="false">
-              <img src="assets/tower-normal.jpg" alt="">
+              <span class="tower-preview" aria-hidden="true">
+                <img class="tower-preview-platform" src="assets/platform.png" alt="">
+                <img class="tower-preview-art" src="assets/tower-normal.png" alt="">
+              </span>
               <span><strong>Normal</strong><small>40 gold · balanced</small></span>
               <kbd>1</kbd>
             </button>
             <button class="tower-option" data-tower="sniper" type="button" aria-pressed="false">
-              <img src="assets/tower-sniper.jpg" alt="">
+              <span class="tower-preview" aria-hidden="true">
+                <img class="tower-preview-platform" src="assets/platform.png" alt="">
+                <img class="tower-preview-art" src="assets/tower-sniper.png" alt="">
+              </span>
               <span><strong>Sniper</strong><small>100 gold · long range</small></span>
               <kbd>2</kbd>
             </button>
             <button class="tower-option" data-tower="machine" type="button" aria-pressed="false">
-              <img src="assets/tower-machine.jpg" alt="">
+              <span class="tower-preview" aria-hidden="true">
+                <img class="tower-preview-platform" src="assets/platform.png" alt="">
+                <img class="tower-preview-art" src="assets/tower-machine.png" alt="">
+              </span>
               <span><strong>Machine gun</strong><small>80 gold · rapid fire</small></span>
               <kbd>3</kbd>
             </button>
           </div>
+          <button id="airstrike-button" class="airstrike-button" type="button" hidden aria-pressed="false">
+            <img src="assets/plane-transparent.png" alt="">
+            <span><strong>Airstrike</strong><small id="airstrike-status">Ready</small></span>
+          </button>
           <aside id="tower-info" class="tower-info" aria-live="polite" hidden>
             <h2 id="tower-info-name"></h2>
             <dl>

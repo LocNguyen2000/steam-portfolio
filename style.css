@@ -1153,3 +1153,125 @@ h3 {
     transform: none;
   }
 }
+
+.gaming-page .gaming-content > .panel {
+  padding: 26px;
+  border-color: rgb(114 200 234 / 18%);
+  background:
+    radial-gradient(ellipse at 100% 0, rgb(43 108 137 / 14%), transparent 38%),
+    linear-gradient(145deg, rgb(15 30 44 / 94%), rgb(8 17 29 / 96%));
+}
+
+.gaming-page .gaming-content .panel-heading {
+  align-items: flex-end;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.gaming-page .gaming-content .panel-heading h2 {
+  font-size: 22px;
+}
+
+.gaming-page .gaming-content .content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.gaming-page .content-grid .project-card {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  min-height: 156px;
+  border-color: rgb(145 177 198 / 14%);
+  border-radius: 12px;
+  background: rgb(6 16 27 / 78%);
+}
+
+.gaming-page .content-grid .content-art {
+  height: 100%;
+  min-height: 156px;
+  border-right: 1px solid rgb(145 177 198 / 12%);
+  border-bottom: 0;
+}
+
+.gaming-page .content-grid .project-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 19px 22px;
+}
+
+.gaming-page .content-grid .project-copy > p:not(.project-type) {
+  min-height: 0;
+  margin-bottom: 13px;
+}
+
+.gaming-page .content-grid .project-demo-link {
+  margin-top: auto;
+}
+
+.gaming-page .content-grid .content-tower-defense {
+  grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.1fr);
+  min-height: 250px;
+  border-color: rgb(114 200 234 / 32%);
+  background: linear-gradient(110deg, rgb(20 40 58 / 78%), rgb(6 16 27 / 92%));
+}
+
+.gaming-page .content-grid .content-tower-defense .content-art {
+  min-height: 250px;
+  border-right-color: rgb(114 200 234 / 20%);
+}
+
+.gaming-page .content-grid .content-tower-defense .project-copy {
+  justify-content: center;
+  padding: 28px;
+}
+
+.gaming-page .content-grid .content-tower-defense h3 {
+  font-size: 20px;
+}
+
+.gaming-page .content-grid .content-tower-defense .project-type {
+  color: var(--green);
+}
+
+@media (max-width: 640px) {
+  .gaming-page .gaming-content > .panel {
+    padding: 17px;
+  }
+
+  .gaming-page .content-grid .project-card,
+  .gaming-page .content-grid .content-tower-defense {
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+
+  .gaming-page .content-grid .content-art,
+  .gaming-page .content-grid .content-tower-defense .content-art {
+    min-height: 100%;
+  }
+
+  .gaming-page .content-grid .project-copy,
+  .gaming-page .content-grid .content-tower-defense .project-copy {
+    padding: 15px;
+  }
+
+  .gaming-page .gaming-content .panel-heading {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 420px) {
+  .gaming-page .content-grid .project-card,
+  .gaming-page .content-grid .content-tower-defense {
+    grid-template-columns: 1fr;
+  }
+
+  .gaming-page .content-grid .content-art,
+  .gaming-page .content-grid .content-tower-defense .content-art {
+    height: 140px;
+    min-height: 140px;
+    border-right: 0;
+    border-bottom: 1px solid rgb(145 177 198 / 12%);
+  }
+}

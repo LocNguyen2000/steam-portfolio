@@ -6,7 +6,12 @@ const COLUMNS = 20;
 const ROWS = 13;
 const HEIGHT = ROWS * TILE_SIZE;
 const LEVEL_SETUP_SECONDS = 15;
-const LEVEL_TWO_GOLD = 300;
+const LEVEL_TWO_GOLD = 200;
+const LEVEL_TWO_SPAWN_INTERVAL = 4;
+const AIRSTRIKE_COOLDOWN_MS = 30000;
+const AIRSTRIKE_DAMAGE = 100;
+const AIRSTRIKE_DROP_INTERVAL_MS = 180;
+const AIRSTRIKE_EXPLOSION_MS = 650;
 
 // Both maps use the same symbols: . buildable, # scenery, > < ^ v road,
 // F random fork, M merge, E exit, A-D scenery, and P/S tower pads.
@@ -30,12 +35,12 @@ const LEVEL_TWO_LAYOUT = [
   "............###P##..",
   "........SSS.........",
   "................P...",
-  "...............>>>>E",
-  "............P..^##..",
-  ".....>>>>>v.P..^.P..",
-  "...P.^.P..v..P.^....",
-  ".P...^....v.P..^...S",
-  "..P..^.P..M>>>>^..P.",
+  ".....>>>>>>>>>>M>>>E",
+  ".....^......P..^##..",
+  ".....^......P..^.P..",
+  "...P.^.P.....P.^....",
+  ".P...^......P..^...S",
+  "..P..^.P..>>>>>^..P.",
   ">>>>>F>>>>^.P.......",
   "..P....P.....P...P..",
   ".......P..P.........",
@@ -81,19 +86,20 @@ const LEVEL_TWO_BUILD_PADS = LEVEL_TWO_LAYOUT.flatMap((row, y) =>
 );
 
 const TOWERS = {
-  normal: { name: "Normal", cost: 40, range: 250, damage: 3, cooldown: 1000, bulletDuration: 500, bulletColor: "#d17d2a", sound: "normalShot", cannon: "normalCannon" },
-  sniper: { name: "Sniper", cost: 100, range: 350, damage: 5, cooldown: 3000, bulletDuration: 650, bulletColor: "#d6c827", sound: "sniperShot", cannon: "sniperCannon" },
-  machine: { name: "Machine gun", cost: 80, range: 250, damage: 4, cooldown: 1000, bulletDuration: 100, bulletColor: "#27db4b", sound: "machineShot", cannon: "rapidCannon" }
+  normal: { name: "Normal", cost: 40, range: 250, damage: 3, cooldown: 1000, bulletDuration: 500, bulletColor: "#d17d2a", sound: "normalShot" },
+  sniper: { name: "Sniper", cost: 100, range: 350, damage: 5, cooldown: 3000, bulletDuration: 650, bulletColor: "#d6c827", sound: "sniperShot" },
+  machine: { name: "Machine gun", cost: 80, range: 250, damage: 4, cooldown: 1000, bulletDuration: 100, bulletColor: "#27db4b", sound: "machineShot" }
 };
 
 const LEVEL_TWO_SNIPER_STATS = { ...TOWERS.sniper, damage: 30, cooldown: 1000 };
 const TOWER_SPRITES = { normal: 7, sniper: 8, machine: 9 };
 
 const ENEMIES = {
-  0: { health: 15, speed: 2, reward: 5, radius: 9, color: "#f0f8ff" },
-  1: { health: 30, speed: 1, reward: 10, radius: 10, color: "#ff4500" },
-  2: { health: 100, speed: 1, reward: 35, radius: 15, color: "#6495ed" },
-  3: { health: 500, speed: 1, reward: 100, radius: 18, color: "#45474d" }
+  0: { health: 15, speed: 2, reward: 5, livesLost: 1, radius: 9, color: "#f0f8ff" },
+  1: { health: 30, speed: 1, reward: 10, livesLost: 1, radius: 10, color: "#ff4500" },
+  2: { health: 100, speed: 1, reward: 35, livesLost: 2, radius: 15, color: "#6495ed" },
+  3: { health: 500, speed: 1, reward: 100, livesLost: 3, radius: 18, color: "#45474d" },
+  4: { health: 600, speed: 0.8, reward: 150, livesLost: 4, radius: 21, color: "#b36bff" }
 };
 
 const SPRITES = {
@@ -104,9 +110,9 @@ const SPRITES = {
   4: [384, 448],
   5: [384, 448],
   6: [384, 448],
-  7: [1280, 384],
-  8: [1344, 384],
-  9: [1408, 384],
+  7: [1216, 384],
+  8: [1216, 384],
+  9: [1216, 384],
   10: [1344, 320],
   11: [1408, 320],
   12: [1024, 320],
@@ -117,15 +123,20 @@ const SPRITES = {
 
 const assets = {
   tiles: loadImage("assets/tile.jpg"),
+  plane: loadImage("assets/plane-transparent.png"),
+  airstrikeExplosion: loadImage("assets/airstrike-explosion.png"),
   enemySprites: [
     loadImage("assets/enemy_0-transparent.png"),
     loadImage("assets/enemy_1-transparent.png"),
     loadImage("assets/enemy_2-transparent.png"),
     loadImage("assets/enemy_4-transparent.png")
   ],
-  normalCannon: loadImage("assets/cannon-normal.png"),
-  sniperCannon: loadImage("assets/cannon-sniper.png"),
-  rapidCannon: loadImage("assets/cannon-rapid.png"),
+  towerArt: {
+    normal: loadImage("assets/tower-normal.png"),
+    sniper: loadImage("assets/tower-sniper.png"),
+    machine: loadImage("assets/tower-machine.png")
+  },
+  towerPlatform: loadImage("assets/platform.png"),
   normalShot: loadAudio("assets/normal-cannon.wav"),
   sniperShot: loadAudio("assets/sniper-cannon.mp3"),
   machineShot: loadAudio("assets/shot.wav"),
@@ -145,6 +156,8 @@ const menuScreen = document.querySelector("#menu-screen");
 const gameScreen = document.querySelector("#game-screen");
 const statusMessage = document.querySelector("#status-message");
 const buildButtons = [...document.querySelectorAll(".tower-option")];
+const airstrikeButton = document.querySelector("#airstrike-button");
+const airstrikeStatus = document.querySelector("#airstrike-status");
 
 let game = null;
 let lastFrame = 0;
@@ -300,10 +313,14 @@ function createGame(level = 1) {
     towers: [],
     bullets: [],
     coinRewards: [],
-    resources: level === 2 ? LEVEL_TWO_GOLD : 400,
+    airstrike: null,
+    airstrikeTargetStart: null,
+    airstrikeTargeting: false,
+    airstrikeReadyAt: 0,
+    resources: level === 2 ? LEVEL_TWO_GOLD : 350,
     level,
     score: 0,
-    lives: 20,
+    lives: level === 2 ? 25 : 20,
     timer: LEVEL_SETUP_SECONDS,
     secondElapsed: 0,
     elapsed: 0,
@@ -339,6 +356,10 @@ function startGame(level = selectedLevel) {
 
 function setSelectedTower(type) {
   if (!game) return;
+  if (type) {
+    game.airstrikeTargeting = false;
+    game.airstrikeTargetStart = null;
+  }
   game.selectedTower = type;
   if (type) game.inspectedTower = null;
   buildButtons.forEach((button) => {
@@ -398,6 +419,7 @@ function upgradeTower(type) {
 
   game.resources -= cost;
   tower.stats = stats;
+  tower.type = type;
   tower.sprite = TOWER_SPRITES[type];
   tower.nextAttack = performance.now();
   game.map[tower.y][tower.x] = tower.sprite;
@@ -416,7 +438,30 @@ function drawMap() {
   for (let y = 0; y < ROWS; y += 1) {
     for (let x = 0; x < COLUMNS; x += 1) {
       const [sourceX, sourceY] = SPRITES[game.map[y][x]] || SPRITES[0];
-      context.drawImage(assets.tiles, sourceX, sourceY, TILE_SIZE, TILE_SIZE, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      const tileX = x * TILE_SIZE;
+      const tileY = y * TILE_SIZE;
+      context.drawImage(assets.tiles, sourceX, sourceY, TILE_SIZE, TILE_SIZE, tileX, tileY, TILE_SIZE, TILE_SIZE);
+
+      const light = context.createLinearGradient(tileX, tileY, tileX + TILE_SIZE, tileY + TILE_SIZE);
+      light.addColorStop(0, "rgba(255, 255, 255, 0.08)");
+      light.addColorStop(0.55, "rgba(255, 255, 255, 0)");
+      light.addColorStop(1, "rgba(8, 19, 24, 0.13)");
+      context.fillStyle = light;
+      context.fillRect(tileX, tileY, TILE_SIZE, TILE_SIZE);
+      context.fillStyle = "rgba(230, 255, 246, 0.13)";
+      context.fillRect(tileX + 1, tileY + 1, TILE_SIZE - 2, 1);
+      context.fillRect(tileX + 1, tileY + 1, 1, TILE_SIZE - 2);
+      context.fillStyle = "rgba(5, 15, 18, 0.16)";
+      context.fillRect(tileX + TILE_SIZE - 2, tileY + 2, 1, TILE_SIZE - 3);
+      context.fillRect(tileX + 2, tileY + TILE_SIZE - 2, TILE_SIZE - 3, 1);
+
+      if (game.map[y][x] >= 1 && game.map[y][x] <= 6) {
+        const roadLip = context.createLinearGradient(tileX, tileY + TILE_SIZE - 8, tileX, tileY + TILE_SIZE);
+        roadLip.addColorStop(0, "rgba(255, 255, 255, 0)");
+        roadLip.addColorStop(1, "rgba(12, 18, 20, 0.2)");
+        context.fillStyle = roadLip;
+        context.fillRect(tileX + 2, tileY + TILE_SIZE - 8, TILE_SIZE - 4, 6);
+      }
     }
   }
 
@@ -444,11 +489,31 @@ function drawMap() {
   }
 }
 
-function drawTowers() {
-  for (const tower of game.towers) {
-    const cannon = assets[tower.stats.cannon];
-    if (cannon.complete && cannon.naturalWidth) {
-      context.drawImage(cannon, tower.x * TILE_SIZE, tower.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+function drawTowers(towers = game.towers) {
+  for (const tower of towers) {
+    const centerX = tower.centerX;
+    const centerY = tower.centerY;
+    const art = assets.towerArt[tower.type];
+
+    context.save();
+    context.fillStyle = "rgba(6, 18, 18, 0.38)";
+    context.beginPath();
+    context.ellipse(centerX + 2, centerY + 20, 25, 11, 0, 0, Math.PI * 2);
+    context.fill();
+
+    context.restore();
+
+    if (assets.towerPlatform.complete && assets.towerPlatform.naturalWidth) {
+      context.drawImage(assets.towerPlatform, centerX - 24, centerY - 24, 48, 48);
+    }
+    if (art.complete && art.naturalWidth) {
+      const drawWidth = tower.type === "sniper" ? 28 : 42;
+      const drawHeight = tower.type === "sniper" ? 38 : 42;
+      context.save();
+      context.translate(centerX, centerY);
+      context.rotate(tower.rotation);
+      context.drawImage(art, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+      context.restore();
     }
   }
 }
@@ -501,11 +566,25 @@ function drawRangePreview() {
   context.restore();
 }
 
-function drawEnemies() {
-  for (const enemy of game.enemies) {
+function drawEnemies(enemies = game.enemies) {
+  for (const enemy of enemies) {
     if (enemy.removed) continue;
-    const sprite = assets.enemySprites[enemy.type];
-    const spriteSize = 42;
+    const sprite = assets.enemySprites[Math.min(enemy.type, assets.enemySprites.length - 1)];
+    const spriteSize = enemy.type === 4 ? 50 : 42;
+    context.save();
+    context.fillStyle = "rgba(5, 16, 20, 0.36)";
+    context.beginPath();
+    context.ellipse(enemy.x + 2, enemy.y + enemy.radius * 0.78, enemy.radius * 1.18, enemy.radius * 0.55, 0, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
+
+    if (enemy.type === 4) {
+      context.beginPath();
+      context.arc(enemy.x, enemy.y, enemy.radius + 4, 0, Math.PI * 2);
+      context.lineWidth = 3;
+      context.strokeStyle = enemy.color;
+      context.stroke();
+    }
     if (sprite.complete && sprite.naturalWidth) {
       context.save();
       context.translate(enemy.x, enemy.y);
@@ -591,10 +670,176 @@ function updateCoinRewards(delta) {
 function render() {
   drawMap();
   drawRangePreview();
-  drawTowers();
+  const towersByDepth = game.towers.slice().sort((a, b) => a.centerY - b.centerY);
+  const enemiesByDepth = game.enemies.filter((enemy) => !enemy.removed).slice().sort((a, b) => a.y - b.y);
+  const worldEntities = [
+    ...towersByDepth.map((tower) => ({ depth: tower.centerY + 16, draw: () => drawTowers([tower]) })),
+    ...enemiesByDepth.map((enemy) => ({ depth: enemy.y + enemy.radius, draw: () => drawEnemies([enemy]) }))
+  ].sort((a, b) => a.depth - b.depth);
+  for (const entity of worldEntities) entity.draw();
   drawBullets();
-  drawEnemies();
   drawCoinRewards();
+  drawAirstrike();
+}
+
+function updateAirstrikeButton() {
+  if (!game) {
+    airstrikeButton.hidden = true;
+    return;
+  }
+  airstrikeButton.hidden = false;
+  const cooldownRemaining = Math.max(0, game.airstrikeReadyAt - game.elapsed);
+  airstrikeButton.disabled = cooldownRemaining > 0 || game.over || game.levelComplete;
+  airstrikeButton.setAttribute("aria-pressed", String(game.airstrikeTargeting));
+  airstrikeStatus.textContent = game.airstrikeTargeting
+    ? game.airstrikeTargetStart ? "Choose direction" : "Choose first tile"
+    : cooldownRemaining > 0
+      ? `Ready in ${Math.ceil(cooldownRemaining / 1000)}s`
+      : "Ready";
+}
+
+function beginAirstrikeTargeting() {
+  if (!game || game.over || game.levelComplete) return;
+  if (game.elapsed < game.airstrikeReadyAt || game.airstrike) return;
+  game.selectedTower = null;
+  game.airstrikeTargetStart = null;
+  game.airstrikeTargeting = !game.airstrikeTargeting;
+  document.querySelector(".board-wrap").classList.remove("building");
+  buildButtons.forEach((button) => button.setAttribute("aria-pressed", "false"));
+  statusMessage.textContent = game.airstrikeTargeting
+    ? "Airstrike: click a starting tile, then a second tile to set direction."
+    : "Airstrike cancelled.";
+  updateTowerInfo();
+  updateAirstrikeButton();
+}
+
+function launchAirstrike(start, directionX, directionY) {
+  const cells = Array.from({ length: 6 }, (_, index) => ({
+    x: start.x + directionX * index,
+    y: start.y + directionY * index,
+    dropped: false
+  }));
+  if (cells.some((cell) =>
+    cell.x < 0 || cell.x >= COLUMNS || cell.y < 0 || cell.y >= ROWS
+  )) {
+    statusMessage.textContent = "That direction needs six clear map tiles. Choose another direction.";
+    game.airstrikeTargetStart = start;
+    return;
+  }
+
+  game.airstrike = { cells, directionX, directionY, elapsed: 0 };
+  game.airstrikeReadyAt = game.elapsed + AIRSTRIKE_COOLDOWN_MS;
+  game.airstrikeTargeting = false;
+  game.airstrikeTargetStart = null;
+  statusMessage.textContent = "Airstrike inbound!";
+  updateAirstrikeButton();
+}
+
+function targetAirstrike(tile) {
+  if (!tile) {
+    statusMessage.textContent = "Choose a tile on the map.";
+    return;
+  }
+  if (!game.airstrikeTargetStart) {
+    game.airstrikeTargetStart = tile;
+    statusMessage.textContent = "Now click another tile to set the bombing direction.";
+    updateAirstrikeButton();
+    return;
+  }
+
+  const deltaX = tile.x - game.airstrikeTargetStart.x;
+  const deltaY = tile.y - game.airstrikeTargetStart.y;
+  if (deltaX === 0 && deltaY === 0) {
+    statusMessage.textContent = "Choose a different tile to set the direction.";
+    return;
+  }
+  const directionX = Math.abs(deltaX) >= Math.abs(deltaY)
+    ? Math.sign(deltaX)
+    : 0;
+  const directionY = directionX === 0 ? Math.sign(deltaY) : 0;
+  launchAirstrike(game.airstrikeTargetStart, directionX, directionY);
+  updateAirstrikeButton();
+}
+
+function updateAirstrike(delta) {
+  if (!game.airstrike) return;
+  const airstrike = game.airstrike;
+  airstrike.elapsed += delta;
+  airstrike.cells.forEach((cell, index) => {
+    const dropTime = index * AIRSTRIKE_DROP_INTERVAL_MS;
+    if (cell.dropped || airstrike.elapsed < dropTime) return;
+    cell.dropped = true;
+    for (const enemy of game.enemies) {
+      if (
+        enemy.removed || enemy.dead ||
+        Math.floor(enemy.x / TILE_SIZE) !== cell.x ||
+        Math.floor(enemy.y / TILE_SIZE) !== cell.y
+      ) continue;
+      enemy.health -= AIRSTRIKE_DAMAGE;
+      if (enemy.health <= 0) removeEnemy(enemy);
+    }
+  });
+  const effectDuration =
+    (airstrike.cells.length - 1) * AIRSTRIKE_DROP_INTERVAL_MS + AIRSTRIKE_EXPLOSION_MS;
+  if (airstrike.elapsed >= effectDuration) game.airstrike = null;
+}
+
+function drawAirstrike() {
+  if (!game.airstrike) return;
+  const airstrike = game.airstrike;
+  const { cells, directionX, directionY, elapsed } = airstrike;
+  cells.forEach((cell, index) => {
+    const explosionElapsed = elapsed - index * AIRSTRIKE_DROP_INTERVAL_MS;
+    if (explosionElapsed < 0 || explosionElapsed >= AIRSTRIKE_EXPLOSION_MS) return;
+    const progress = explosionElapsed / AIRSTRIKE_EXPLOSION_MS;
+    const size = TILE_SIZE * (0.65 + progress * 0.35);
+    if (assets.airstrikeExplosion.complete && assets.airstrikeExplosion.naturalWidth) {
+      const explosionWidth =
+        size * (assets.airstrikeExplosion.naturalWidth / assets.airstrikeExplosion.naturalHeight);
+      context.save();
+      context.globalAlpha = 1 - progress * 0.7;
+      const centerX = (cell.x + 0.5) * TILE_SIZE;
+      const centerY = (cell.y + 0.5) * TILE_SIZE;
+      const glow = context.createRadialGradient(centerX, centerY, 2, centerX, centerY, size * 0.55);
+      glow.addColorStop(0, "rgba(255, 177, 72, 0.42)");
+      glow.addColorStop(1, "rgba(255, 101, 33, 0)");
+      context.fillStyle = glow;
+      context.beginPath();
+      context.ellipse(centerX, centerY + 9, size * 0.48, size * 0.25, 0, 0, Math.PI * 2);
+      context.fill();
+      context.drawImage(
+        assets.airstrikeExplosion,
+        centerX - explosionWidth / 2,
+        centerY - size / 2,
+        explosionWidth,
+        size
+      );
+      context.restore();
+    }
+  });
+
+  const flightProgress = Math.min(
+    1,
+    elapsed / ((cells.length - 1) * AIRSTRIKE_DROP_INTERVAL_MS)
+  );
+  const planeX = (cells[0].x + directionX * (cells.length - 1) * flightProgress + 0.5) * TILE_SIZE;
+  const planeY = (cells[0].y + directionY * (cells.length - 1) * flightProgress + 0.5) * TILE_SIZE;
+  context.save();
+  context.translate(planeX, planeY);
+  context.rotate(Math.atan2(directionY, directionX));
+  if (assets.plane.complete && assets.plane.naturalWidth) {
+    context.drawImage(assets.plane, -22, -28, 44, 56);
+  } else {
+    context.fillStyle = "#e8f0f7";
+    context.beginPath();
+    context.moveTo(20, 0);
+    context.lineTo(-16, -11);
+    context.lineTo(-9, 0);
+    context.lineTo(-16, 11);
+    context.closePath();
+    context.fill();
+  }
+  context.restore();
 }
 
 function getEnemyRotation(from, to) {
@@ -628,14 +873,22 @@ function updateEnemies(delta) {
   }
 }
 
-function attack(tower, now) {
-  if (now < tower.nextAttack) return;
+function attack(tower, now, delta) {
   const target = game.enemies.find((enemy) =>
     !enemy.removed && !enemy.dead &&
     Math.hypot(enemy.x - tower.centerX, enemy.y - tower.centerY) <= tower.stats.range
   );
   if (!target) return;
 
+  const targetAngle = Math.atan2(target.y - tower.centerY, target.x - tower.centerX) + Math.PI / 2;
+  const angleDifference = Math.atan2(
+    Math.sin(targetAngle - tower.rotation),
+    Math.cos(targetAngle - tower.rotation)
+  );
+  const turnAmount = Math.min(Math.abs(angleDifference), delta * 0.012);
+  tower.rotation += Math.sign(angleDifference) * turnAmount;
+
+  if (now < tower.nextAttack) return;
   tower.nextAttack = now + tower.stats.cooldown;
   target.health -= tower.stats.damage;
   if (target.health <= 0) target.dead = true;
@@ -694,10 +947,22 @@ function spawnForTimer() {
   if (game.timer > 110) {
     createEnemy(Math.floor(Math.random() * 2));
   } else if (game.timer > 75 && game.timer <= 95) {
-    createEnemy(Math.floor(Math.random() * 3));
+    if (game.level !== 2 || game.timer % LEVEL_TWO_SPAWN_INTERVAL === 0) {
+      createEnemy(
+        game.level === 2
+          ? 2 + Math.floor(Math.random() * 3)
+          : Math.floor(Math.random() * 3)
+      );
+    }
   } else if (game.timer >= 30 && game.timer <= 55) {
-    createEnemy(Math.floor(Math.random() * 3));
-    if (game.timer === 30) createEnemy(3);
+    if (game.level !== 2 || game.timer % LEVEL_TWO_SPAWN_INTERVAL === 0) {
+      createEnemy(
+        game.level === 2
+          ? 2 + Math.floor(Math.random() * 3)
+          : Math.floor(Math.random() * 3)
+      );
+    }
+    if (game.timer === 30) createEnemy(game.level === 2 ? 4 : 3);
   } else if (game.timer <= 0) {
     game.spawningComplete = true;
     game.timer = 0;
@@ -708,7 +973,10 @@ function removeEnemy(enemy) {
   if (enemy.removed) return;
   enemy.removed = true;
   if (enemy.pathFinished) {
-    game.lives = Math.max(0, game.lives - 1);
+    const livesLost = game.level === 2
+      ? Math.max(1, enemy.livesLost - 1)
+      : enemy.livesLost;
+    game.lives = Math.max(0, game.lives - livesLost);
     if (game.lives === 0) finishGame();
   } else {
     game.resources += enemy.reward;
@@ -732,6 +1000,7 @@ function finishGame() {
   document.querySelector("#game-over").hidden = false;
   assets.music.pause();
   setSelectedTower(null);
+  updateAirstrikeButton();
 }
 
 function completeLevel() {
@@ -793,6 +1062,7 @@ function updateHud() {
   if (!startWarning.hidden) {
     startWarning.textContent = `Level ${game.level} starts in ${game.timer} second${game.timer === 1 ? "" : "s"}`;
   }
+  updateAirstrikeButton();
 }
 
 function update(delta, now) {
@@ -807,7 +1077,8 @@ function update(delta, now) {
     }
   }
   updateEnemies(delta);
-  for (const tower of game.towers) attack(tower, now);
+  updateAirstrike(delta);
+  for (const tower of game.towers) attack(tower, now, delta);
   updateBullets(delta);
   updateCoinRewards(delta);
   if (
@@ -845,6 +1116,10 @@ function getBoardTile(event) {
 function placeTower(event) {
   if (!game || game.over) return;
   const tile = getBoardTile(event);
+  if (game.airstrikeTargeting) {
+    targetAirstrike(tile);
+    return;
+  }
   const tower = getTowerAtTile(tile);
   if (tower) {
     game.inspectedTower = { x: tower.x, y: tower.y };
@@ -874,6 +1149,8 @@ function placeTower(event) {
     y,
     centerX: x * TILE_SIZE + TILE_SIZE / 2,
     centerY: y * TILE_SIZE + TILE_SIZE / 2,
+    type: game.selectedTower,
+    rotation: 0,
     sprite,
     stats,
     nextAttack: performance.now() + 100
@@ -885,6 +1162,8 @@ function placeTower(event) {
 buildButtons.forEach((button) => {
   button.addEventListener("click", () => setSelectedTower(button.dataset.tower));
 });
+
+airstrikeButton.addEventListener("click", beginAirstrikeTargeting);
 
 document.querySelectorAll(".tower-upgrade").forEach((button) => {
   button.addEventListener("click", () => upgradeTower(button.dataset.upgrade));
@@ -907,6 +1186,7 @@ document.addEventListener("click", (event) => {
   if (!game || !(event.target instanceof Element)) return;
   if (
     event.target.closest(".tower-option") ||
+    event.target.closest(".airstrike-button") ||
     event.target.closest("#board") ||
     event.target.closest("#tower-info")
   ) return;
@@ -944,8 +1224,11 @@ document.addEventListener("keydown", (event) => {
   if (!game || gameScreen.hidden) return;
   if (event.key === "Escape") {
     setSelectedTower(null);
+    game.airstrikeTargeting = false;
+    game.airstrikeTargetStart = null;
     game.inspectedTower = null;
     updateTowerInfo();
+    updateAirstrikeButton();
   }
   if (event.key === "1") setSelectedTower("normal");
   if (event.key === "2") setSelectedTower("sniper");
