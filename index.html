@@ -97,10 +97,9 @@
                 </div>
                 <div class="project-copy">
                   <p class="project-type">MICROSERVICE MONOREPO</p>
-                  <h3>Monorepo Microservice</h3>
+                  <h3>Rental Management Webapp</h3>
                   <p>
-                    A pnpm workspace for building and managing microservices,
-                    organized with Turborepo.
+                    A rental web application built with modern web technologies. Actually works btw.
                   </p>
                   <div class="tag-list">
                     <span>Microservices</span>
@@ -132,10 +131,9 @@
                 </div>
                 <div class="project-copy">
                   <p class="project-type">FINANCE MANAGEMENT FRONTEND</p>
-                  <h3>MISA TCDN GD2</h3>
+                  <h3>Finance Accounting Webapp</h3>
                   <p>
-                    A Vue 3 frontend project with client-side routing and API
-                    integration.
+                    A frontend project from my fresher projects in MISA JSC.
                   </p>
                   <div class="tag-list">
                     <span>Vue 3</span>
@@ -354,37 +352,7 @@
             </div>
           </section>
 
-          <section class="panel changelog-panel" aria-labelledby="changelog-title">
-            <div class="panel-heading">
-              <div>
-                <p class="eyebrow">WHAT'S NEW</p>
-                <h2 id="changelog-title">Change log</h2>
-              </div>
-              <span class="panel-count">LATEST</span>
-            </div>
-            <ol class="changelog-list">
-              <li class="changelog-entry">
-                <time datetime="2026-10-18">Oct 18, 2026</time>
-                <p>Added gaming section.</p>
-              </li>
-              <li class="changelog-entry">
-                <time datetime="2026-10-17">Oct 17, 2026</time>
-                <p>Added new font Roboto-mono. Added a new project to the portfolio showcase. Added blog content section.</p>
-              </li>
-              <li class="changelog-entry">
-                <time datetime="2026-10-12">Oct 12, 2026</time>
-                <p>Added a new project to the portfolio showcase.</p>
-              </li>
-              <li class="changelog-entry">
-                <time datetime="2026-09-28">Sep 28, 2026</time>
-                <p>Updated the skills loadout with recent tools and technologies.</p>
-              </li>
-              <li class="changelog-entry">
-                <time datetime="2026-09-10">Sep 10, 2026</time>
-                <p>Refreshed the profile and contact details.</p>
-              </li>
-            </ol>
-          </section>
+          <div class="changelog-mount" data-changelog></div>
 
           <section class="panel contact-panel" id="contact">
             <div class="panel-heading">
@@ -426,6 +394,7 @@
         <span>Built with a little Steam profile inspiration.</span>
       </footer>
     </div>
+    <script src="./changelog.js"></script>
     <script>
       const revealTargets = document.querySelectorAll(
         ".profile-layout .panel, .project-card",
@@ -472,8 +441,8 @@
           scale: 1,
           scaleMobile: 1,
           color: 0x72c8ea,
-          color2: 0x14283a,
-          backgroundColor: 0x0b1926,
+          color2: 0x1a3146,
+          backgroundColor: 0x102337,
           size: 2.2,
           spacing: 22,
           showLines: false,

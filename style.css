@@ -81,8 +81,8 @@ a:focus-visible {
   inset: 0 0 auto;
   height: 260px;
   background:
-    linear-gradient(90deg, rgb(5 13 23 / 78%), rgb(5 13 23 / 44%) 68%, rgb(5 13 23 / 60%)),
-    linear-gradient(0deg, #0b1926 0%, rgb(11 25 38 / 15%) 75%),
+    linear-gradient(90deg, rgb(5 13 23 / 68%), rgb(5 13 23 / 34%) 68%, rgb(5 13 23 / 50%)),
+    linear-gradient(0deg, rgb(16 35 55 / 82%) 0%, rgb(16 35 55 / 10%) 75%),
     url("./background.jpg") center 47% / cover;
 }
 
@@ -97,7 +97,15 @@ a:focus-visible {
 }
 
 .gaming-page .profile-layout {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 270px;
+}
+
+.gaming-page .gaming-sidebar > .panel {
+  padding: 20px;
+  border-color: rgb(114 200 234 / 18%);
+  background:
+    radial-gradient(ellipse at 100% 0, rgb(43 108 137 / 14%), transparent 38%),
+    linear-gradient(145deg, rgb(15 30 44 / 94%), rgb(8 17 29 / 96%));
 }
 
 .profile-heading {
@@ -856,6 +864,10 @@ h3 {
 .changelog-list {
   display: grid;
   gap: 16px;
+}
+
+.changelog-mount {
+  display: contents;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1162,6 +1174,26 @@ h3 {
     linear-gradient(145deg, rgb(15 30 44 / 94%), rgb(8 17 29 / 96%));
 }
 
+.gaming-page .gaming-note-panel {
+  margin-bottom: 16px;
+  padding: 18px 22px;
+}
+
+.gaming-page .gaming-note-panel .eyebrow {
+  margin-bottom: 6px;
+}
+
+.gaming-page .gaming-note-panel h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.gaming-page .gaming-note-panel > p:last-child {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 .gaming-page .gaming-content .panel-heading {
   align-items: flex-end;
   margin-bottom: 24px;
@@ -1239,6 +1271,14 @@ h3 {
 @media (max-width: 640px) {
   .gaming-page .gaming-content > .panel {
     padding: 17px;
+  }
+
+  .gaming-page .gaming-note-panel {
+    padding: 16px;
+  }
+
+  .gaming-page .profile-layout {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .gaming-page .content-grid .project-card,

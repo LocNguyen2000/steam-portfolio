@@ -44,6 +44,16 @@
 
       <div class="profile-layout">
         <main class="main-column gaming-content">
+          <section class="panel gaming-note-panel" aria-labelledby="gaming-note-title">
+            <!-- <p class="eyebrow"></p> -->
+            <h2 id="gaming-note-title">My relax station</h2>
+            <!-- Replace this paragraph with your own note. -->
+            <p>Just a place for storing all the things that i love at this moments</p>
+            Add my steam profile: <a href="https://steamcommunity.com/profiles/76561198848937215/" target="_blank" rel="noreferrer">https://steamcommunity.com/id/locnguyen2k/</a> <br/>
+            My chess profile: <a href="https://www.chess.com/member/locnguyen2k" target="_blank" rel="noreferrer">https://www.chess.com/member/locnguyen2k</a> <br/> <br/>
+            Invite me for a game of chess, or just watch my gaming videos on YouTube. I also have a simple tower defense game built with HTML5 Canvas, converted from JavaFX game. Enjoy!</p> 
+          </section>
+
           <section class="panel" id="content">
             <div class="panel-heading">
               <div>
@@ -79,7 +89,7 @@
                 <div class="project-copy">
                   <p class="project-type">GAMING</p>
                   <h3>Chess Game</h3>
-                  <p>A spot for chess games, ideas, and memorable moments.</p>
+                  <p>Just a normal game of chess, nothing special.</p>
                   <div class="tag-list"><span>Chess</span><span>Gaming</span></div>
                   <a
                     class="project-demo-link"
@@ -98,7 +108,7 @@
                 <div class="project-copy">
                   <p class="project-type">GAMING VIDEO</p>
                   <h3>Gaming Content</h3>
-                  <p>A gaming video from my YouTube channel.</p>
+                  <p>A game of Rematch, bought on Steam and played with my friends.</p>
                   <div class="tag-list"><span>Gaming</span><span>YouTube</span></div>
                   <a
                     class="project-demo-link"
@@ -117,7 +127,7 @@
                 <div class="project-copy">
                   <p class="project-type">VIDEO</p>
                   <h3>Badminton Video</h3>
-                  <p>A collection of badminton videos and highlights.</p>
+                  <p>I'm bad at badminton! Yes i said it.</p>
                   <div class="tag-list"><span>Badminton</span><span>Video</span></div>
                   <a
                     class="project-demo-link"
@@ -143,6 +153,31 @@
             </div>
           </section>
         </main>
+
+        <aside class="side-column gaming-sidebar" aria-label="Featured profile and hobbies">
+          <section class="panel badge-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">FEATURED BADGE</p>
+                <h2>Avid Gamer / Sports Enthusiast</h2>
+              </div>
+            </div>
+            <div class="featured-badge">
+              <img src="./avatar.jpg" alt="Gaming avatar" />
+              <div>
+                <strong>Loc Nguyen</strong>
+                <span>Always up for a game</span>
+              </div>
+            </div>
+            <div class="badge-chips" aria-label="Hobbies">
+              <span>Gaming</span>
+              <span>Chess</span>
+              <span>Badminton</span>
+              <span>Coding</span>
+            </div>
+          </section>
+          <div class="changelog-mount" data-changelog></div>
+        </aside>
       </div>
 
       <footer class="site-footer">
@@ -151,6 +186,7 @@
         <span>Built with a little Steam profile inspiration.</span>
       </footer>
     </div>
+    <script src="./changelog.js"></script>
     <script>
       const revealTargets = document.querySelectorAll(
         ".profile-layout .panel, .project-card",
@@ -191,8 +227,8 @@
           scale: 1,
           scaleMobile: 1,
           color: 0x72c8ea,
-          color2: 0x14283a,
-          backgroundColor: 0x0b1926,
+          color2: 0x1a3146,
+          backgroundColor: 0x102337,
         });
       }
     </script>
