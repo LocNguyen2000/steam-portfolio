@@ -1,7 +1,11 @@
 const gamingContentList = document.querySelector("[data-content-list]");
 const featuredContentList = document.querySelector("[data-featured-list]");
 const featuredCarousel = document.querySelector("[data-featured-carousel]");
+const featuredGameSpotlight = document.querySelector("[data-featured-game]");
+const featuredGameCard = document.querySelector("[data-featured-game-card]");
 const gamingConfig = window.GUESTBOOK_CONFIG;
+const FEATURED_GAME_SLUGS = new Set(["game", "pixel-game"]);
+const SIDEBAR_GAME_SLUG = "pixel-game";
 
 function appendTextElement(parent, tagName, className, text) {
   const element = document.createElement(tagName);
@@ -45,7 +49,7 @@ function renderGamingItem(item) {
   }
 
   const card = document.createElement("article");
-  const isFeatured = item.slug === "game";
+  const isFeatured = FEATURED_GAME_SLUGS.has(item.slug) || item.featured === true;
   card.className = [
     "project-card",
     isFeatured ? "featured-slide" : "",
@@ -211,26 +215,40 @@ function setupFeaturedCarousel(posts) {
   showSlide(0);
 }
 
-async function loadGamingContent() {
-  const posts = await loadPublishedPosts();
-  const featuredPosts = posts.filter((post) => post.slug === "game");
-  const regularPosts = posts.filter((post) => post.slug !== "game");
+function renderFeaturedPosts(posts) {
   document.querySelector("[data-featured-count]").textContent =
-    `${String(featuredPosts.length).padStart(2, "0")} POSTS`;
-  document.querySelector("[data-content-count]").textContent =
-    `${String(regularPosts.length).padStart(2, "0")} ITEMS`;
+    `${String(posts.length).padStart(2, "0")} FEATURES`;
+  const featuredGame = posts.find((post) => post.slug === SIDEBAR_GAME_SLUG);
+  const carouselPosts = posts.filter((post) => post.slug !== SIDEBAR_GAME_SLUG);
 
-  if (featuredPosts.length === 0) {
+  if (featuredGame) {
+    const gameCard = renderGamingItem(featuredGame);
+    gameCard.classList.add("featured-game-card");
+    featuredGameCard.replaceChildren(gameCard);
+    featuredGameSpotlight.hidden = false;
+  }
+
+  if (carouselPosts.length === 0) {
     appendTextElement(
       featuredContentList,
       "p",
       "content-loading",
-      "No featured game blogs yet.",
+      "No other featured posts yet.",
     );
+    featuredCarousel.setAttribute("aria-label", "Featured games and blogs");
   } else {
-    featuredContentList.replaceChildren(...featuredPosts.map(renderGamingItem));
-    setupFeaturedCarousel(featuredPosts);
+    featuredContentList.replaceChildren(...carouselPosts.map(renderGamingItem));
   }
+  setupFeaturedCarousel(carouselPosts);
+}
+
+async function loadGamingContent() {
+  const posts = await loadPublishedPosts();
+  const featuredPosts = posts.filter((post) => FEATURED_GAME_SLUGS.has(post.slug));
+  const regularPosts = posts.filter((post) => !FEATURED_GAME_SLUGS.has(post.slug));
+  renderFeaturedPosts(featuredPosts);
+  document.querySelector("[data-content-count]").textContent =
+    `${String(regularPosts.length).padStart(2, "0")} ITEMS`;
 
   if (regularPosts.length === 0) {
     appendTextElement(
@@ -287,7 +305,6 @@ if (gamingContentList) {
   loadGamingContent().catch((error) => {
     console.error("Unable to load gaming and blog content.", error);
     gamingContentList.replaceChildren();
-    featuredContentList.replaceChildren();
     document.querySelector("[data-content-count]").textContent = "ERROR";
     document.querySelector("[data-featured-count]").textContent = "ERROR";
     appendTextElement(
@@ -300,7 +317,7 @@ if (gamingContentList) {
       featuredContentList,
       "p",
       "content-loading",
-      "Featured blogs could not be loaded.",
+      "Featured games and blogs could not be loaded. Check the Supabase connection and posts table, then refresh.",
     );
   });
 }

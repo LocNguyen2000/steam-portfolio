@@ -11,9 +11,12 @@ has read-only access).
 The `posts` table stores content type, title, summary, image, tags, card style,
 optional link, stable slug, publication date, full body, and display order.
 Set `is_published` to `false` to keep a draft out of the public page.
-Published posts with the exact slug `game` appear in the Featured game blogs
-slideshow, which displays each post's image, summary, tags, and creation time;
-other posts remain in the Gaming & blog collection.
+The Room Map Explorer game is stored as a published post with the exact slug
+`pixel-game`. It appears in the Featured games & blogs slideshow alongside
+published posts with the exact slug `game`; the game is displayed beside the
+slideshow, while those other featured posts remain in it. Other posts remain
+in the Gaming & blog collection. The local game card is shown as a fallback
+until Supabase loads, or if the `pixel-game` post has not been added yet.
 
 The site loads Supabase data over HTTP/HTTPS. Open it through a local web server
 or its deployed URL instead of directly from `file://`.

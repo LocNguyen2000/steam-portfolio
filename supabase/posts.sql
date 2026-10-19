@@ -136,5 +136,22 @@ values
     false,
     5,
     true
+  ),
+  (
+    'pixel-game',
+    'PIXEL GAME',
+    'Room Map Explorer',
+    'Explore my pixel-art room and inspect the objects around it.',
+    'pixel-game',
+    null,
+    '',
+    './images/blog-game-pixel.png',
+    array['Pixel art', 'Explore'],
+    '',
+    'Play game',
+    './game-pixel/index.html',
+    false,
+    6,
+    true
   )
 on conflict (id) do nothing;

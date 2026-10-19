@@ -139,14 +139,34 @@ a:focus-visible {
   font-size: 22px;
 }
 
+.gaming-page .featured-showcase {
+  display: grid;
+  width: min(1240px, calc(100% - 48px));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 30px;
+  margin: 0 auto 28px;
+}
+
 .gaming-page .featured-carousel {
   position: relative;
-  width: min(1240px, calc(100% - 48px));
-  margin: 0 auto 28px;
+  min-width: 0;
 }
 
 .gaming-page .featured-content-grid {
   display: block;
+}
+
+.gaming-page .featured-game-spotlight {
+  min-width: 0;
+}
+
+.gaming-page .featured-game-spotlight[hidden] {
+  display: none;
+}
+
+.gaming-page .featured-game-spotlight .featured-game-card {
+  height: 100%;
 }
 
 .gaming-page .featured-content-grid .featured-slide[hidden] {
@@ -155,7 +175,7 @@ a:focus-visible {
 
 .gaming-page .featured-content-grid .featured-slide {
   display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.8fr);
+  grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
   min-height: 440px;
   overflow: hidden;
   border: 1px solid rgb(145 177 198 / 16%);
@@ -1636,7 +1656,7 @@ h3 {
 }
 
 .gaming-page .featured-content-grid .featured-slide {
-  grid-template-columns: minmax(0, 1.8fr) minmax(280px, 0.8fr);
+  grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
   min-height: 440px;
 }
 
@@ -1662,8 +1682,13 @@ h3 {
 }
 
 @media (max-width: 760px) {
-  .gaming-page .featured-carousel {
+  .gaming-page .featured-showcase {
     width: calc(100% - 32px);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gaming-page .featured-carousel {
+    width: 100%;
   }
 
   .gaming-page .featured-content-grid .featured-slide {
