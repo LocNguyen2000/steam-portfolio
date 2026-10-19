@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="gaming-page">
   <head>
     <title>Gaming &amp; Blog | Nguyen Huu Loc</title>
     <meta
@@ -41,6 +41,33 @@
           <a href="#content">Gaming &amp; blog</a>
         </nav>
       </header>
+
+      <section class="featured-game-section" aria-labelledby="featured-content-title">
+        <div class="featured-game-heading">
+          <div>
+            <p class="eyebrow">FEATURED · GAME</p>
+            <h2 id="featured-content-title">Featured game blogs</h2>
+          </div>
+          <span class="panel-count" data-featured-count>Loading…</span>
+        </div>
+        <div
+          class="featured-carousel"
+          data-featured-carousel
+          role="region"
+          aria-label="Featured game blogs slideshow"
+        >
+          <div class="project-grid content-grid featured-content-grid" data-featured-list aria-live="off">
+            <p class="content-loading" role="status">Loading featured blogs…</p>
+          </div>
+          <button class="featured-slide-control featured-slide-previous" type="button" data-slide-previous aria-label="Show previous featured game blog" hidden>
+            <span aria-hidden="true">←</span>
+          </button>
+          <button class="featured-slide-control featured-slide-next" type="button" data-slide-next aria-label="Show next featured game blog" hidden>
+            <span aria-hidden="true">→</span>
+          </button>
+          <div class="featured-slide-pagination" data-slide-pagination role="group" aria-label="Choose a featured game blog"></div>
+        </div>
+      </section>
 
       <div class="profile-layout">
         <main class="main-column gaming-content">

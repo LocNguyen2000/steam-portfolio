@@ -377,7 +377,8 @@ h1 span {
   gap: 10px;
 }
 
-.airstrike-button {
+.airstrike-button,
+.tank-skill-button {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -391,37 +392,52 @@ h1 span {
   text-align: left;
 }
 
-.airstrike-button[hidden] {
+.tank-skill-button kbd {
+  margin-left: 5px;
+  color: #9aadb3;
+  font: inherit;
+  font-size: 0.68rem;
+}
+
+.airstrike-button[hidden],
+.tank-skill-button[hidden] {
   display: none;
 }
 
-.airstrike-button:disabled {
+.airstrike-button:disabled,
+.tank-skill-button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
 
 .airstrike-button[aria-pressed="true"],
-.airstrike-button:not(:disabled):hover {
+.airstrike-button:not(:disabled):hover,
+.tank-skill-button[aria-pressed="true"],
+.tank-skill-button:not(:disabled):hover {
   border-color: #74d7b3;
   background: #24443b;
 }
 
-.airstrike-button img {
+.airstrike-button img,
+.tank-skill-button img {
   width: 38px;
   height: 38px;
   object-fit: contain;
 }
 
-.airstrike-button span {
+.airstrike-button span,
+.tank-skill-button span {
   display: grid;
   gap: 3px;
 }
 
-.airstrike-button strong {
+.airstrike-button strong,
+.tank-skill-button strong {
   font-size: 0.8rem;
 }
 
-.airstrike-button small {
+.airstrike-button small,
+.tank-skill-button small {
   color: #a9c8bb;
   font-size: 0.64rem;
 }
@@ -565,7 +581,8 @@ h1 span {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .airstrike-button {
+  .airstrike-button,
+  .tank-skill-button {
     width: 100%;
     min-height: 44px;
     margin-top: 8px;
@@ -588,6 +605,10 @@ h1 span {
   }
 
   .tower-option kbd {
+    display: none;
+  }
+
+  .tank-skill-button kbd {
     display: none;
   }
 
@@ -708,18 +729,21 @@ h1 span {
     font-size: 0.58rem;
   }
 
-  .game-screen .airstrike-button {
+  .game-screen .airstrike-button,
+  .game-screen .tank-skill-button {
     min-height: 38px;
     margin: 0;
     padding: 4px 6px;
   }
 
-  .game-screen .airstrike-button img {
+  .game-screen .airstrike-button img,
+  .game-screen .tank-skill-button img {
     width: 28px;
     height: 28px;
   }
 
-  .game-screen .airstrike-button small {
+  .game-screen .airstrike-button small,
+  .game-screen .tank-skill-button small {
     font-size: 0.55rem;
   }
 

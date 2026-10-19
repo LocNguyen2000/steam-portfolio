@@ -47,7 +47,7 @@
         </header>
 
         <div class="board-wrap">
-          <canvas id="board" width="1280" height="832" aria-label="Game map. Click an open tile to place the selected tower."></canvas>
+          <canvas id="board" width="1280" height="832" aria-label="Game map. Place towers on open tiles or deploy the Tank Ally on a road."></canvas>
           <div id="level-start-warning" class="level-start-warning" role="status" hidden></div>
           <div id="game-over" class="game-over" hidden>
             <p class="eyebrow">DEFENSE FAILED</p>
@@ -93,6 +93,11 @@
           <button id="airstrike-button" class="airstrike-button" type="button" hidden aria-pressed="false">
             <img src="assets/plane-transparent.png" alt="">
             <span><strong>Airstrike</strong><small id="airstrike-status">Ready</small></span>
+          </button>
+          <button id="tank-skill-button" class="tank-skill-button" type="button" hidden aria-pressed="false">
+            <img src="assets/tank.png" alt="">
+            <span><strong>Tank Ally</strong><small id="tank-skill-status">Ready</small></span>
+            <kbd>4</kbd>
           </button>
           <aside id="tower-info" class="tower-info" aria-live="polite" hidden>
             <h2 id="tower-info-name"></h2>

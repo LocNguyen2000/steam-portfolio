@@ -1,4 +1,6 @@
 const gamingContentList = document.querySelector("[data-content-list]");
+const featuredContentList = document.querySelector("[data-featured-list]");
+const featuredCarousel = document.querySelector("[data-featured-carousel]");
 const gamingConfig = window.GUESTBOOK_CONFIG;
 
 function appendTextElement(parent, tagName, className, text) {
@@ -43,29 +45,58 @@ function renderGamingItem(item) {
   }
 
   const card = document.createElement("article");
-  card.className = `project-card ${item.card_class ?? ""}`.trim();
+  const isFeatured = item.slug === "game";
+  card.className = [
+    "project-card",
+    isFeatured ? "featured-slide" : "",
+    item.card_class ?? "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const art = document.createElement("div");
   art.className = "project-art content-art";
-  art.setAttribute("aria-hidden", "true");
+  if (!isFeatured) {
+    art.setAttribute("aria-hidden", "true");
+  }
   const imageUrl = safeContentUrl(item.image_url);
   if (imageUrl) {
     const image = document.createElement("img");
     image.src = imageUrl;
-    image.alt = "";
+    image.alt = isFeatured ? item.title : "";
     art.append(image);
   } else {
+    art.setAttribute("aria-hidden", "true");
     appendTextElement(art, "span", "", "</>");
   }
 
   const copy = document.createElement("div");
-  copy.className = "project-copy";
+  copy.className = `project-copy${isFeatured ? " featured-slide-details" : ""}`;
   appendTextElement(copy, "p", "project-type", item.content_type);
   appendTextElement(copy, "h3", "", item.title);
   appendTextElement(copy, "p", "", item.summary);
 
+  if (isFeatured && item.created_at) {
+    const createdAt = new Date(item.created_at);
+    if (Number.isNaN(createdAt.getTime())) {
+      throw new Error(`Post "${item.title}" has an invalid creation date.`);
+    }
+
+    const createdAtLabel = document.createElement("div");
+    createdAtLabel.className = "featured-created-at";
+    appendTextElement(createdAtLabel, "span", "", "CREATED AT");
+    const time = document.createElement("time");
+    time.dateTime = item.created_at;
+    time.textContent = new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(createdAt);
+    createdAtLabel.append(time);
+    copy.append(createdAtLabel);
+  }
+
   const tagList = document.createElement("div");
-  tagList.className = "tag-list";
+  tagList.className = `tag-list${isFeatured ? " featured-slide-tags" : ""}`;
   item.tags.forEach((tag) => appendTextElement(tagList, "span", "", tag));
   copy.append(tagList);
 
@@ -114,11 +145,94 @@ function observeGamingContent(element) {
   observer.observe(element);
 }
 
+function setupFeaturedCarousel(posts) {
+  const previousButton = featuredCarousel.querySelector("[data-slide-previous]");
+  const nextButton = featuredCarousel.querySelector("[data-slide-next]");
+  const pagination = featuredCarousel.querySelector("[data-slide-pagination]");
+  const slides = [...featuredContentList.querySelectorAll(".project-card")];
+
+  slides.forEach((slide, index) => {
+    slide.setAttribute("role", "group");
+    slide.setAttribute("aria-roledescription", "slide");
+    slide.setAttribute(
+      "aria-label",
+      `${index + 1} of ${slides.length}: ${posts[index].title}`,
+    );
+  });
+
+  if (slides.length < 2) {
+    previousButton.hidden = true;
+    nextButton.hidden = true;
+    pagination.hidden = true;
+    return;
+  }
+
+  let currentSlide = 0;
+  const paginationButtons = slides.map((slide, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "featured-slide-thumbnail";
+    button.setAttribute(
+      "aria-label",
+      `Show slide ${index + 1}: ${posts[index].title}`,
+    );
+    const imageUrl = safeContentUrl(posts[index].image_url);
+    if (imageUrl) {
+      const image = document.createElement("img");
+      image.src = imageUrl;
+      image.alt = "";
+      button.append(image);
+    } else {
+      appendTextElement(button, "span", "", posts[index].title);
+    }
+    button.addEventListener("click", () => showSlide(index));
+    pagination.append(button);
+    return button;
+  });
+
+  function showSlide(index) {
+    currentSlide = (index + slides.length) % slides.length;
+    slides.forEach((slide, slideIndex) => {
+      const isCurrent = slideIndex === currentSlide;
+      slide.hidden = !isCurrent;
+      slide.setAttribute("aria-hidden", String(!isCurrent));
+      paginationButtons[slideIndex].setAttribute(
+        "aria-current",
+        String(isCurrent),
+      );
+    });
+  }
+
+  previousButton.addEventListener("click", () => showSlide(currentSlide - 1));
+  nextButton.addEventListener("click", () => showSlide(currentSlide + 1));
+  previousButton.hidden = false;
+  nextButton.hidden = false;
+  pagination.hidden = false;
+  showSlide(0);
+}
+
 async function loadGamingContent() {
   const posts = await loadPublishedPosts();
+  const featuredPosts = posts.filter((post) => post.slug === "game");
+  const regularPosts = posts.filter((post) => post.slug !== "game");
+  document.querySelector("[data-featured-count]").textContent =
+    `${String(featuredPosts.length).padStart(2, "0")} POSTS`;
   document.querySelector("[data-content-count]").textContent =
-    `${String(posts.length).padStart(2, "0")} ITEMS`;
-  if (posts.length === 0) {
+    `${String(regularPosts.length).padStart(2, "0")} ITEMS`;
+
+  if (featuredPosts.length === 0) {
+    appendTextElement(
+      featuredContentList,
+      "p",
+      "content-loading",
+      "No featured game blogs yet.",
+    );
+  } else {
+    featuredContentList.replaceChildren(...featuredPosts.map(renderGamingItem));
+    setupFeaturedCarousel(featuredPosts);
+  }
+
+  if (regularPosts.length === 0) {
     appendTextElement(
       gamingContentList,
       "p",
@@ -128,7 +242,7 @@ async function loadGamingContent() {
     return;
   }
 
-  gamingContentList.replaceChildren(...posts.map(renderGamingItem));
+  gamingContentList.replaceChildren(...regularPosts.map(renderGamingItem));
   gamingContentList.querySelectorAll(".project-card").forEach(observeGamingContent);
   document.querySelectorAll(".gaming-note-panel").forEach(observeGamingContent);
 }
@@ -146,7 +260,7 @@ async function loadPublishedPosts() {
   const url = new URL("/rest/v1/posts", gamingConfig.url);
   url.search = new URLSearchParams({
     select:
-      "id,content_type,title,summary,image_url,tags,card_class,link_label,link_url,link_new_tab,sort_order,is_published",
+      "id,content_type,title,summary,slug,image_url,tags,card_class,link_label,link_url,link_new_tab,created_at,sort_order,is_published",
     is_published: "eq.true",
     order: "sort_order.asc",
   }).toString();
@@ -173,11 +287,20 @@ if (gamingContentList) {
   loadGamingContent().catch((error) => {
     console.error("Unable to load gaming and blog content.", error);
     gamingContentList.replaceChildren();
+    featuredContentList.replaceChildren();
+    document.querySelector("[data-content-count]").textContent = "ERROR";
+    document.querySelector("[data-featured-count]").textContent = "ERROR";
     appendTextElement(
       gamingContentList,
       "p",
       "content-loading",
       "Posts could not be loaded. Check the Supabase connection and posts table, then refresh.",
+    );
+    appendTextElement(
+      featuredContentList,
+      "p",
+      "content-loading",
+      "Featured blogs could not be loaded.",
     );
   });
 }

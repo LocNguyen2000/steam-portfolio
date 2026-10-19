@@ -9,12 +9,20 @@ const LEVEL_SETUP_SECONDS = 15;
 const LEVEL_TWO_GOLD = 200;
 const LEVEL_TWO_SPAWN_INTERVAL = 4;
 const AIRSTRIKE_COOLDOWN_MS = 30000;
+const TANK_ALLY_COOLDOWN_MS = 30000;
+const TANK_ALLY_HEALTH = 600;
+const TANK_ALLY_RADIUS = 24;
+const TANK_ALLY_SPEED = 0.018;
+const TANK_ALLY_RANGE = 350;
+const TANK_ALLY_DAMAGE = 30;
+const TANK_ALLY_COOLDOWN = 1000;
+const TANK_ALLY_BULLET_DURATION = 500;
 const AIRSTRIKE_DAMAGE = 100;
 const AIRSTRIKE_DROP_INTERVAL_MS = 180;
 const AIRSTRIKE_EXPLOSION_MS = 650;
 
 // Both maps use the same symbols: . buildable, # scenery, > < ^ v road,
-// F random fork, M merge, E exit, A-D scenery, and P/S tower pads.
+// F random fork, M merge, E exit, and A-D scenery.
 const LEVEL_ONE_LAYOUT = [
   ".......DDB...A......",
   "B.A...BCC........A..",
@@ -32,26 +40,26 @@ const LEVEL_ONE_LAYOUT = [
 ];
 
 const LEVEL_TWO_LAYOUT = [
-  "............###P##..",
-  "........SSS.........",
-  "................P...",
+  "....##....###....##.",
+  "##......##..........",
+  "...#.............#..",
   ".....>>>>>>>>>>M>>>E",
-  ".....^......P..^##..",
-  ".....^......P..^.P..",
-  "...P.^.P.....P.^....",
-  ".P...^......P..^...S",
-  "..P..^.P..>>>>>^..P.",
-  ">>>>>F>>>>^.P.......",
-  "..P....P.....P...P..",
-  ".......P..P.........",
-  "...##.#P..P#S##.#S##"
+  "...##^......#..^##..",
+  "##...^...##....^..##",
+  "#..#.^.#.....#.^...#",
+  "#....^..##..#..^...#",
+  "#....^.#..>>>>>^.#.#",
+  ">>>>>F>>>>^.........",
+  "##....#....##....#..",
+  "....##....##....##..",
+  "...##.#....#.##.#.##"
 ];
 
 const LEVEL_LAYOUTS = [LEVEL_ONE_LAYOUT, LEVEL_TWO_LAYOUT];
 const GROUND_TILES = [10, 11, 12, 13];
 const MAP_SYMBOL_TILES = {
   ".": 0, ">": 1, v: 2, "^": 3, "<": 4, E: 5,
-  A: 10, B: 11, C: 12, D: 13, P: 0, S: 0, F: 14, M: 15
+  A: 10, B: 11, C: 12, D: 13, F: 14, M: 15
 };
 
 for (const [index, layout] of LEVEL_LAYOUTS.entries()) {
@@ -81,9 +89,6 @@ function createMap(layout) {
 }
 
 const LEVEL_MAPS = LEVEL_LAYOUTS.map(createMap);
-const LEVEL_TWO_BUILD_PADS = LEVEL_TWO_LAYOUT.flatMap((row, y) =>
-  Array.from(row, (cell, x) => cell === "P" || cell === "S" ? { x, y, marker: cell } : null).filter(Boolean)
-);
 
 const TOWERS = {
   normal: { name: "Normal", cost: 40, range: 250, damage: 3, cooldown: 1000, bulletDuration: 500, bulletColor: "#d17d2a", sound: "normalShot" },
@@ -95,11 +100,11 @@ const LEVEL_TWO_SNIPER_STATS = { ...TOWERS.sniper, damage: 30, cooldown: 1000 };
 const TOWER_SPRITES = { normal: 7, sniper: 8, machine: 9 };
 
 const ENEMIES = {
-  0: { health: 15, speed: 2, reward: 5, livesLost: 1, radius: 9, color: "#f0f8ff" },
-  1: { health: 30, speed: 1, reward: 10, livesLost: 1, radius: 10, color: "#ff4500" },
-  2: { health: 100, speed: 1, reward: 35, livesLost: 2, radius: 15, color: "#6495ed" },
-  3: { health: 500, speed: 1, reward: 100, livesLost: 3, radius: 18, color: "#45474d" },
-  4: { health: 600, speed: 0.8, reward: 150, livesLost: 4, radius: 21, color: "#b36bff" }
+  0: { health: 15, speed: 2, reward: 5, livesLost: 1, radius: 9, blockDamage: 10, color: "#f0f8ff" },
+  1: { health: 30, speed: 1, reward: 10, livesLost: 1, radius: 10, blockDamage: 15, color: "#ff4500" },
+  2: { health: 100, speed: 1, reward: 35, livesLost: 2, radius: 15, blockDamage: 25, color: "#6495ed" },
+  3: { health: 500, speed: 1, reward: 100, livesLost: 3, radius: 18, blockDamage: 40, color: "#45474d" },
+  4: { health: 600, speed: 0.8, reward: 150, livesLost: 4, radius: 21, blockDamage: 50, color: "#b36bff" }
 };
 
 const SPRITES = {
@@ -125,6 +130,8 @@ const assets = {
   tiles: loadImage("assets/tile.jpg"),
   plane: loadImage("assets/plane-transparent.png"),
   airstrikeExplosion: loadImage("assets/airstrike-explosion.png"),
+  tank: loadImage("assets/tank.png"),
+  tankCannon: loadImage("assets/tank-cannon.png"),
   enemySprites: [
     loadImage("assets/enemy_0-transparent.png"),
     loadImage("assets/enemy_1-transparent.png"),
@@ -158,6 +165,8 @@ const statusMessage = document.querySelector("#status-message");
 const buildButtons = [...document.querySelectorAll(".tower-option")];
 const airstrikeButton = document.querySelector("#airstrike-button");
 const airstrikeStatus = document.querySelector("#airstrike-status");
+const tankSkillButton = document.querySelector("#tank-skill-button");
+const tankSkillStatus = document.querySelector("#tank-skill-status");
 
 let game = null;
 let lastFrame = 0;
@@ -313,6 +322,9 @@ function createGame(level = 1) {
     towers: [],
     bullets: [],
     coinRewards: [],
+    tank: null,
+    tankReadyAt: 0,
+    tankTargeting: false,
     airstrike: null,
     airstrikeTargetStart: null,
     airstrikeTargeting: false,
@@ -359,6 +371,7 @@ function setSelectedTower(type) {
   if (type) {
     game.airstrikeTargeting = false;
     game.airstrikeTargetStart = null;
+    game.tankTargeting = false;
   }
   game.selectedTower = type;
   if (type) game.inspectedTower = null;
@@ -369,10 +382,10 @@ function setSelectedTower(type) {
   document.querySelector(".board-wrap").classList.toggle("building", Boolean(type));
   statusMessage.textContent = type
     ? `Click an open tile to build a ${TOWERS[type].name} tower. Press Esc to cancel.`
-    : game.level === 2
-      ? "Level 2: P pads suit Normal/Rapid range; S pads suit Snipers. Any tower can use either."
-      : "Choose a tower to start building.";
+    : "Choose a tower to start building.";
   updateTowerInfo();
+  updateAirstrikeButton();
+  updateTankSkillButton();
 }
 
 function getTowerAtTile(tile) {
@@ -464,29 +477,6 @@ function drawMap() {
       }
     }
   }
-
-  if (game.level === 2) {
-    context.save();
-    context.strokeStyle = "rgba(119, 223, 255, 0.9)";
-    context.fillStyle = "rgba(119, 223, 255, 0.9)";
-    context.lineWidth = 2;
-    context.setLineDash([4, 3]);
-    for (const { x, y, marker } of LEVEL_TWO_BUILD_PADS) {
-      if (game.map[y][x] !== 0) continue;
-      const centerX = x * TILE_SIZE + TILE_SIZE / 2;
-      const centerY = y * TILE_SIZE + TILE_SIZE / 2;
-      context.beginPath();
-      context.arc(centerX, centerY, 20, 0, Math.PI * 2);
-      context.stroke();
-      context.setLineDash([]);
-      context.font = "bold 12px Segoe UI, Arial, sans-serif";
-      context.textAlign = "center";
-      context.textBaseline = "middle";
-      context.fillText(marker, centerX, centerY);
-      context.setLineDash([4, 3]);
-    }
-    context.restore();
-  }
 }
 
 function drawTowers(towers = game.towers) {
@@ -518,7 +508,123 @@ function drawTowers(towers = game.towers) {
   }
 }
 
+function drawTankAlly() {
+  const tank = game.tank;
+  if (!tank) return;
+
+  context.save();
+  context.fillStyle = "rgba(5, 16, 20, 0.42)";
+  context.beginPath();
+  context.ellipse(tank.centerX + 2, tank.centerY + 15, 25, 12, 0, 0, Math.PI * 2);
+  context.fill();
+  if (assets.tank.complete && assets.tank.naturalWidth) {
+    context.save();
+    context.translate(tank.centerX, tank.centerY);
+    context.rotate(tank.heading - Math.PI / 2);
+    context.drawImage(assets.tank, -24, -24, 48, 48);
+    context.restore();
+  } else {
+    context.fillStyle = "#277d51";
+    context.fillRect(tank.centerX - 20, tank.centerY - 16, 40, 32);
+  }
+  context.translate(tank.centerX, tank.centerY);
+  context.rotate(tank.rotation - Math.PI / 2);
+  if (assets.tankCannon.complete && assets.tankCannon.naturalWidth) {
+    context.drawImage(assets.tankCannon, -14, -10, 56, 20);
+  } else {
+    context.fillStyle = "#456f55";
+    context.fillRect(-7, -7, 20, 14);
+    context.fillStyle = "#b4c0b5";
+    context.fillRect(5, -3, 17, 6);
+  }
+  context.restore();
+
+  const healthRatio = Math.max(0, tank.health / tank.maxHealth);
+  context.fillStyle = "rgba(20, 24, 27, 0.85)";
+  context.fillRect(tank.centerX - 23, tank.centerY - 30, 46, 5);
+  context.fillStyle = "#77e4a7";
+  context.fillRect(tank.centerX - 23, tank.centerY - 30, 46 * healthRatio, 5);
+}
+
+function isRoadTile(tile) {
+  return (tile >= 1 && tile <= 4) || tile === 14 || tile === 15;
+}
+
+function projectOntoPath(x, y, path) {
+  let pathPosition = 0;
+  let closestPoint = null;
+  let closestDistance = Infinity;
+  for (let index = 0; index < path.length - 1; index += 1) {
+    const start = path[index];
+    const end = path[index + 1];
+    const segmentX = end.x - start.x;
+    const segmentY = end.y - start.y;
+    const segmentLength = Math.hypot(segmentX, segmentY);
+    const projection = segmentLength === 0
+      ? 0
+      : Math.max(0, Math.min(1, (
+        (x - start.x) * segmentX + (y - start.y) * segmentY
+      ) / (segmentLength * segmentLength)));
+    const projectedX = start.x + segmentX * projection;
+    const projectedY = start.y + segmentY * projection;
+    const distance = Math.hypot(x - projectedX, y - projectedY);
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestPoint = {
+        x: projectedX,
+        y: projectedY,
+        heading: Math.atan2(segmentY, segmentX),
+        pathPosition: pathPosition + segmentLength * projection
+      };
+    }
+    pathPosition += segmentLength;
+  }
+  return closestPoint ? { ...closestPoint, distance: closestDistance } : null;
+}
+
+function getPathPointAtDistance(path, requestedDistance) {
+  let remainingDistance = Math.max(0, requestedDistance);
+  for (let index = 0; index < path.length - 1; index += 1) {
+    const start = path[index];
+    const end = path[index + 1];
+    const segmentX = end.x - start.x;
+    const segmentY = end.y - start.y;
+    const segmentLength = Math.hypot(segmentX, segmentY);
+    if (remainingDistance <= segmentLength || index === path.length - 2) {
+      const progress = segmentLength === 0 ? 0 : Math.min(1, remainingDistance / segmentLength);
+      return {
+        x: start.x + segmentX * progress,
+        y: start.y + segmentY * progress,
+        heading: Math.atan2(segmentY, segmentX)
+      };
+    }
+    remainingDistance -= segmentLength;
+  }
+  return path[0] || { x: 0, y: 0, heading: 0 };
+}
+
 function drawRangePreview() {
+  if (game.tankTargeting && game.hoverTile) {
+    const { x, y } = game.hoverTile;
+    const centerX = x * TILE_SIZE + TILE_SIZE / 2;
+    const centerY = y * TILE_SIZE + TILE_SIZE / 2;
+    const deployPoint = isRoadTile(game.map[y][x])
+      ? projectOntoPath(centerX, centerY, game.path)
+      : null;
+    const canDeploy = Boolean(deployPoint && deployPoint.distance <= TILE_SIZE / 2);
+    context.save();
+    context.beginPath();
+    context.arc(centerX, centerY, TANK_ALLY_RANGE, 0, Math.PI * 2);
+    context.fillStyle = canDeploy ? "rgba(116, 196, 255, 0.12)" : "rgba(255, 111, 111, 0.08)";
+    context.fill();
+    context.lineWidth = 2;
+    context.strokeStyle = canDeploy ? "rgba(116, 196, 255, 0.8)" : "rgba(255, 111, 111, 0.7)";
+    context.setLineDash([8, 6]);
+    context.stroke();
+    context.restore();
+    return;
+  }
+
   const hoveredTower = getTowerAtTile(game.hoverTile);
   const rangeTower = hoveredTower || getTowerAtTile(game.inspectedTower);
   if (!game.hoverTile && !rangeTower) return;
@@ -674,6 +780,7 @@ function render() {
   const enemiesByDepth = game.enemies.filter((enemy) => !enemy.removed).slice().sort((a, b) => a.y - b.y);
   const worldEntities = [
     ...towersByDepth.map((tower) => ({ depth: tower.centerY + 16, draw: () => drawTowers([tower]) })),
+    ...(game.tank ? [{ depth: game.tank.centerY + 18, draw: drawTankAlly }] : []),
     ...enemiesByDepth.map((enemy) => ({ depth: enemy.y + enemy.radius, draw: () => drawEnemies([enemy]) }))
   ].sort((a, b) => a.depth - b.depth);
   for (const entity of worldEntities) entity.draw();
@@ -698,9 +805,119 @@ function updateAirstrikeButton() {
       : "Ready";
 }
 
+function updateTankSkillButton() {
+  if (!game || game.level !== 2) {
+    tankSkillButton.hidden = true;
+    return;
+  }
+  tankSkillButton.hidden = false;
+  const cooldownRemaining = Math.max(0, game.tankReadyAt - game.elapsed);
+  tankSkillButton.disabled = Boolean(game.tank) || cooldownRemaining > 0 || game.over || game.levelComplete;
+  tankSkillButton.setAttribute("aria-pressed", String(game.tankTargeting));
+  tankSkillStatus.textContent = game.tank
+    ? `Holding · ${Math.ceil(game.tank.health)} HP`
+    : game.tankTargeting
+      ? "Choose a route tile"
+      : cooldownRemaining > 0
+        ? `Ready in ${Math.ceil(cooldownRemaining / 1000)}s`
+        : "Ready";
+}
+
+function beginTankTargeting() {
+  if (!game || game.level !== 2 || game.over || game.levelComplete || game.tank) return;
+  if (game.elapsed < game.tankReadyAt) return;
+  if (game.tankTargeting) {
+    game.tankTargeting = false;
+    statusMessage.textContent = "Tank summon cancelled.";
+  } else {
+    game.airstrikeTargeting = false;
+    game.airstrikeTargetStart = null;
+    game.selectedTower = null;
+    game.tankTargeting = true;
+    document.querySelector(".board-wrap").classList.remove("building");
+    buildButtons.forEach((button) => button.setAttribute("aria-pressed", "false"));
+    statusMessage.textContent = "Tank Ally: choose a tile on the active route to deploy.";
+  }
+  updateTowerInfo();
+  updateAirstrikeButton();
+  updateTankSkillButton();
+}
+
+function summonTankAlly(tile) {
+  if (!game || game.level !== 2) return;
+  if (!tile) {
+    statusMessage.textContent = "Choose a tile on the active route for the Tank Ally.";
+    return;
+  }
+  if (!isRoadTile(game.map[tile.y][tile.x])) {
+    statusMessage.textContent = "The Tank Ally can only deploy on a road tile.";
+    return;
+  }
+
+  const requestedX = tile.x * TILE_SIZE + TILE_SIZE / 2;
+  const requestedY = tile.y * TILE_SIZE + TILE_SIZE / 2;
+  const closestPoint = projectOntoPath(requestedX, requestedY, game.path);
+  if (!closestPoint || closestPoint.distance > TILE_SIZE / 2) {
+    statusMessage.textContent = "Choose a road tile on the Tank Ally's route.";
+    return;
+  }
+
+  const centerX = closestPoint.x;
+  const centerY = closestPoint.y;
+  game.tank = {
+    x: tile.x,
+    y: tile.y,
+    centerX,
+    centerY,
+    health: TANK_ALLY_HEALTH,
+    maxHealth: TANK_ALLY_HEALTH,
+    range: TANK_ALLY_RANGE,
+    path: game.path,
+    pathPosition: closestPoint.pathPosition,
+    moveTarget: null,
+    heading: closestPoint.heading,
+    rotation: 0,
+    nextAttack: performance.now(),
+    stats: {
+      range: TANK_ALLY_RANGE,
+      damage: TANK_ALLY_DAMAGE,
+      cooldown: TANK_ALLY_COOLDOWN,
+      bulletDuration: TANK_ALLY_BULLET_DURATION,
+      bulletColor: "#d6c827",
+      sound: "sniperShot"
+    }
+  };
+  game.tankReadyAt = game.elapsed + TANK_ALLY_COOLDOWN_MS;
+  game.tankTargeting = false;
+  statusMessage.textContent = "Tank Ally deployed! Click another road tile to move it.";
+  updateHud();
+}
+
+function commandTankAlly(tile) {
+  if (!game || game.level !== 2 || !game.tank) return;
+  if (!tile || !isRoadTile(game.map[tile.y][tile.x])) {
+    statusMessage.textContent = "Click a road tile on the active route to move the Tank Ally.";
+    return;
+  }
+
+  const target = projectOntoPath(
+    tile.x * TILE_SIZE + TILE_SIZE / 2,
+    tile.y * TILE_SIZE + TILE_SIZE / 2,
+    game.tank.path
+  );
+  if (!target || target.distance > TILE_SIZE / 2) {
+    statusMessage.textContent = "That road is not part of the active route.";
+    return;
+  }
+
+  game.tank.moveTarget = target.pathPosition;
+  statusMessage.textContent = "Tank Ally moving to your selected road tile.";
+}
+
 function beginAirstrikeTargeting() {
   if (!game || game.over || game.levelComplete) return;
   if (game.elapsed < game.airstrikeReadyAt || game.airstrike) return;
+  game.tankTargeting = false;
   game.selectedTower = null;
   game.airstrikeTargetStart = null;
   game.airstrikeTargeting = !game.airstrikeTargeting;
@@ -711,6 +928,7 @@ function beginAirstrikeTargeting() {
     : "Airstrike cancelled.";
   updateTowerInfo();
   updateAirstrikeButton();
+  updateTankSkillButton();
 }
 
 function launchAirstrike(start, directionX, directionY) {
@@ -846,6 +1064,39 @@ function getEnemyRotation(from, to) {
   return Math.atan2(to.y - from.y, to.x - from.x) + Math.PI / 2;
 }
 
+function updateTankAlly(delta) {
+  const tank = game.tank;
+  if (!tank || tank.moveTarget === null) return;
+
+  const difference = tank.moveTarget - tank.pathPosition;
+  if (Math.abs(difference) <= 0.01) {
+    tank.pathPosition = tank.moveTarget;
+    tank.moveTarget = null;
+    return;
+  }
+
+  const movement = Math.min(Math.abs(difference), TANK_ALLY_SPEED * delta);
+  const direction = Math.sign(difference);
+  const nextPosition = tank.pathPosition + movement * direction;
+  const nextPoint = getPathPointAtDistance(tank.path, nextPosition);
+  const blockedByEnemy = game.enemies.some((enemy) =>
+    !enemy.removed && !enemy.dead &&
+    Math.hypot(nextPoint.x - enemy.x, nextPoint.y - enemy.y) <= TANK_ALLY_RADIUS + enemy.radius
+  );
+  if (blockedByEnemy) return;
+
+  tank.pathPosition = nextPosition;
+  tank.centerX = nextPoint.x;
+  tank.centerY = nextPoint.y;
+  tank.x = Math.floor(nextPoint.x / TILE_SIZE);
+  tank.y = Math.floor(nextPoint.y / TILE_SIZE);
+  tank.heading = nextPoint.heading + (direction < 0 ? Math.PI : 0);
+  if (Math.abs(tank.moveTarget - tank.pathPosition) <= 0.01) {
+    tank.pathPosition = tank.moveTarget;
+    tank.moveTarget = null;
+  }
+}
+
 function updateEnemies(delta) {
   for (const enemy of game.enemies) {
     if (enemy.removed || enemy.dead) continue;
@@ -858,6 +1109,25 @@ function updateEnemies(delta) {
     const axis = target.x !== enemy.x ? "x" : "y";
     const difference = target[axis] - enemy[axis];
     const movement = enemy.speed * delta / 10;
+    const nextX = axis === "x"
+      ? enemy.x + Math.sign(difference) * Math.min(Math.abs(difference), movement)
+      : enemy.x;
+    const nextY = axis === "y"
+      ? enemy.y + Math.sign(difference) * Math.min(Math.abs(difference), movement)
+      : enemy.y;
+    if (
+      game.tank &&
+      Math.hypot(nextX - game.tank.centerX, nextY - game.tank.centerY) <=
+        TANK_ALLY_RADIUS + enemy.radius
+    ) {
+      game.tank.health -= enemy.blockDamage * delta / 1000;
+      if (game.tank.health <= 0) {
+        game.tank = null;
+        statusMessage.textContent = "Your Tank Ally was destroyed.";
+        updateTankSkillButton();
+      }
+      continue;
+    }
     if (Math.abs(difference) <= movement) {
       enemy[axis] = target[axis];
       enemy.pathIndex += 1;
@@ -996,16 +1266,23 @@ function removeEnemy(enemy) {
 
 function finishGame() {
   game.over = true;
+  game.airstrikeTargeting = false;
+  game.airstrikeTargetStart = null;
+  game.tankTargeting = false;
   document.querySelector("#final-score").textContent = game.score;
   document.querySelector("#game-over").hidden = false;
   assets.music.pause();
   setSelectedTower(null);
   updateAirstrikeButton();
+  updateTankSkillButton();
 }
 
 function completeLevel() {
   if (game.levelComplete || game.over) return;
   game.levelComplete = true;
+  game.airstrikeTargeting = false;
+  game.airstrikeTargetStart = null;
+  game.tankTargeting = false;
   saveLevelProgress(game.level);
   const panel = document.querySelector("#level-complete");
   const heading = document.querySelector("#level-complete-title");
@@ -1018,6 +1295,8 @@ function completeLevel() {
   button.textContent = game.level < LEVEL_MAPS.length ? `Continue to Level ${game.level + 1}` : "Play again";
   panel.hidden = false;
   setSelectedTower(null);
+  updateAirstrikeButton();
+  updateTankSkillButton();
 }
 
 function continueToNextLevel() {
@@ -1035,6 +1314,13 @@ function continueToNextLevel() {
   game.towers = [];
   game.bullets = [];
   game.coinRewards = [];
+  game.airstrike = null;
+  game.airstrikeTargetStart = null;
+  game.airstrikeTargeting = false;
+  game.airstrikeReadyAt = 0;
+  game.tank = null;
+  game.tankReadyAt = 0;
+  game.tankTargeting = false;
   game.timer = LEVEL_SETUP_SECONDS;
   game.secondElapsed = 0;
   game.waveStarted = false;
@@ -1043,7 +1329,7 @@ function continueToNextLevel() {
   game.hoverTile = null;
   game.inspectedTower = null;
   document.querySelector("#level-complete").hidden = true;
-  statusMessage.textContent = "Level 2: P pads suit Normal/Rapid range; S pads suit Snipers. Any tower can use either.";
+  statusMessage.textContent = "Choose a tower to start building.";
   setSelectedTower(null);
   updateHud();
   lastFrame = performance.now();
@@ -1063,6 +1349,7 @@ function updateHud() {
     startWarning.textContent = `Level ${game.level} starts in ${game.timer} second${game.timer === 1 ? "" : "s"}`;
   }
   updateAirstrikeButton();
+  updateTankSkillButton();
 }
 
 function update(delta, now) {
@@ -1076,11 +1363,14 @@ function update(delta, now) {
       updateHud();
     }
   }
+  updateTankAlly(delta);
   updateEnemies(delta);
   updateAirstrike(delta);
   for (const tower of game.towers) attack(tower, now, delta);
+  if (game.tank) attack(game.tank, now, delta);
   updateBullets(delta);
   updateCoinRewards(delta);
+  updateTankSkillButton();
   if (
     game.spawningComplete &&
     game.enemies.every((enemy) => enemy.removed) &&
@@ -1118,6 +1408,14 @@ function placeTower(event) {
   const tile = getBoardTile(event);
   if (game.airstrikeTargeting) {
     targetAirstrike(tile);
+    return;
+  }
+  if (game.tankTargeting) {
+    summonTankAlly(tile);
+    return;
+  }
+  if (game.tank && tile && isRoadTile(game.map[tile.y][tile.x])) {
+    commandTankAlly(tile);
     return;
   }
   const tower = getTowerAtTile(tile);
@@ -1164,6 +1462,7 @@ buildButtons.forEach((button) => {
 });
 
 airstrikeButton.addEventListener("click", beginAirstrikeTargeting);
+tankSkillButton.addEventListener("click", beginTankTargeting);
 
 document.querySelectorAll(".tower-upgrade").forEach((button) => {
   button.addEventListener("click", () => upgradeTower(button.dataset.upgrade));
@@ -1187,6 +1486,7 @@ document.addEventListener("click", (event) => {
   if (
     event.target.closest(".tower-option") ||
     event.target.closest(".airstrike-button") ||
+    event.target.closest(".tank-skill-button") ||
     event.target.closest("#board") ||
     event.target.closest("#tower-info")
   ) return;
@@ -1226,11 +1526,14 @@ document.addEventListener("keydown", (event) => {
     setSelectedTower(null);
     game.airstrikeTargeting = false;
     game.airstrikeTargetStart = null;
+    game.tankTargeting = false;
     game.inspectedTower = null;
     updateTowerInfo();
     updateAirstrikeButton();
+    updateTankSkillButton();
   }
   if (event.key === "1") setSelectedTower("normal");
   if (event.key === "2") setSelectedTower("sniper");
   if (event.key === "3") setSelectedTower("machine");
+  if (event.key === "4") beginTankTargeting();
 });
