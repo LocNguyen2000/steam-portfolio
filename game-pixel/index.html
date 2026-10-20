@@ -84,6 +84,28 @@
         font-size: 12px;
       }
 
+      #time-toggle {
+        margin-top: 12px;
+        padding: 8px 12px;
+        border: 1px solid rgb(207 222 255 / 24%);
+        border-radius: 8px;
+        background: #202d40;
+        color: #f2f6ff;
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        pointer-events: auto;
+      }
+
+      #time-toggle:hover {
+        background: #2b3b53;
+      }
+
+      #time-toggle:focus-visible {
+        outline: 2px solid #8ee3c0;
+        outline-offset: 2px;
+      }
+
       #inspection {
         position: fixed;
         z-index: 2;
@@ -140,6 +162,9 @@
         Walk around with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or
         the arrow keys. Approach room items and press <kbd>E</kbd> to inspect.
       </p>
+      <button id="time-toggle" type="button" aria-pressed="false">
+        Switch to night
+      </button>
       <div id="status" role="status">Loading room assets…</div>
     </section>
     <aside id="inspection" aria-live="polite" hidden>

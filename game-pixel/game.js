@@ -1,9 +1,11 @@
 const ROOM_WIDTH = 1024;
 const ROOM_HEIGHT = 559;
-const ROOM_BOUNDS = { left: 72, right: 952, top: 48, bottom: 495 };
+const ROOM_BOUNDS = { left: 72, right: 952, top: 224.5, bottom: 495 };
 const PLAYER_SPEED = 190;
 const PLAYER_COLLIDER = { halfWidth: 9, halfHeight: 7 };
+const PLAYER_GROUND_OFFSET = 32;
 const INSPECTION_RANGE = 76;
+const LIGHTING_TRANSITION_MS = 800;
 const FRAME_DIRECTIONS = ["front", "right", "back", "left"];
 const ROOM_OBJECTS = [
   {
@@ -21,103 +23,21 @@ const ROOM_OBJECTS = [
     solid: true,
   },
   {
-    name: "Potted plant",
-    description: "A small potted plant beside the window.",
-    bounds: { left: 387, right: 439, top: 164, bottom: 239 },
-    inspectAt: { x: 413, y: 247 },
+    name: "PS4",
+    description: "A PlayStation 4 console on the desk.",
+    bounds: { left: 770, right: 870, top: 195, bottom: 260 },
+    inspectAt: { x: 800, y: 263 },
     solid: true,
+    size: { width: 100, height: 70 },
   },
   {
-    name: "Window-side wastebasket",
-    description: "A small wastebasket beside the window.",
-    bounds: { left: 597, right: 636, top: 193, bottom: 239 },
-    inspectAt: { x: 617, y: 247 },
+    name: "Screen",
+    description: "A computer screen on the desk.",
+    bounds: { left: 300, right: 400, top: 200, bottom: 300 },
+    inspectAt: { x: 750, y: 75 },
+    size: { width: 140, height: 80 },
     solid: true,
-  },
-  {
-    name: "Desk",
-    description: "A wooden desk with a laptop, a note, and a mouse on top.",
-    bounds: { left: 49, right: 258, top: 187, bottom: 271 },
-    inspectAt: { x: 249, y: 318 },
-    solid: true,
-  },
-  {
-    name: "Laptop",
-    description: "A laptop open on the desk.",
-    bounds: { left: 117, right: 194, top: 176, bottom: 256 },
-    inspectAt: { x: 155, y: 269 },
-    solid: true,
-  },
-  {
-    name: "Note",
-    description: "A small handwritten note on the desk.",
-    bounds: { left: 64, right: 102, top: 208, bottom: 252 },
-    inspectAt: { x: 83, y: 267 },
-    solid: true,
-  },
-  {
-    name: "Mouse",
-    description: "A computer mouse beside the laptop.",
-    bounds: { left: 199, right: 222, top: 220, bottom: 254 },
-    inspectAt: { x: 211, y: 268 },
-    solid: true,
-  },
-  {
-    name: "Chair",
-    description: "A chair pulled up to the desk.",
-    bounds: { left: 125, right: 183, top: 263, bottom: 322 },
-    inspectAt: { x: 154, y: 329 },
-    solid: true,
-  },
-  {
-    name: "Television",
-    description: "A wall-mounted screen displaying a game.",
-    bounds: { left: 784, right: 939, top: 49, bottom: 143 },
-    inspectAt: { x: 861, y: 152 },
-    solid: true,
-  },
-  {
-    name: "PS4 and controllers",
-    description: "A PlayStation console with two controllers.",
-    bounds: { left: 770, right: 892, top: 195, bottom: 273 },
-    inspectAt: { x: 831, y: 282 },
-    solid: true,
-  },
-  {
-    name: "Game cases",
-    description: "A couple of game cases stacked beside the console.",
-    bounds: { left: 921, right: 965, top: 256, bottom: 294 },
-    inspectAt: { x: 943, y: 302 },
-    solid: true,
-  },
-  {
-    name: "Badminton set",
-    description: "Two rackets, shuttlecocks, and a racket case.",
-    bounds: { left: 263, right: 389, top: 400, bottom: 506 },
-    inspectAt: { x: 326, y: 514 },
-    solid: true,
-  },
-  {
-    name: "Door",
-    description: "The doorway leading out of the room.",
-    bounds: { left: 116, right: 187, top: 437, bottom: 559 },
-    inspectAt: { x: 199, y: 473 },
-    solid: true,
-  },
-  {
-    name: "Wastebasket",
-    description: "A wastebasket near the right side of the room.",
-    bounds: { left: 920, right: 961, top: 349, bottom: 400 },
-    inspectAt: { x: 913, y: 374 },
-    solid: true,
-  },
-  {
-    name: "Rug",
-    description: "A large rug in the middle of the room.",
-    bounds: { left: 429, right: 669, top: 246, bottom: 419 },
-    inspectAt: { x: 550, y: 426 },
-    solid: false,
-  },
+  }
 ];
 
 class GameScene extends Phaser.Scene {
@@ -126,20 +46,17 @@ class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("room", "./assets/room.png");
+    this.load.image("room", "./assets/empty-room.jpg");
     this.load.on("loaderror", (file) => {
       const status = document.querySelector("#status");
       if (status) {
         status.textContent = `Couldn't load ${file.key}. Check that the asset is available.`;
       }
     });
-    this.load.image("table", "./assets/room-items/room-table.png");
-    this.load.image("whiteboard", "./assets/room-items/room-whiteboard.png");
-    this.load.image("laptop", "./assets/room-items/room-laptop.png");
-    this.load.image("note", "./assets/room-items/room-note.png");
-    this.load.image("mouse", "./assets/room-items/room-mouse.png");
-    this.load.image("ps4", "./assets/room-items/room-ps4.png");
-    this.load.image("badminton", "./assets/room-items/room-badminton.png");
+    this.load.image("whiteboard", "./assets/room-items/item-whiteboard.png");
+    this.load.image("ps4", "./assets/room-items/ps4-fixed.png");
+    this.load.image("screen", "./assets/room-items/screen.png");
+    // this.load.image("badminton", "./assets/room-items/item-badminton.png");
 
     for (const direction of FRAME_DIRECTIONS) {
       for (let frame = 1; frame <= 4; frame += 1) {
@@ -154,6 +71,8 @@ class GameScene extends Phaser.Scene {
       .image(0, 0, "room")
       .setOrigin(0)
       .setDisplaySize(ROOM_WIDTH, ROOM_HEIGHT);
+
+    this.windowGlow = this.createWindowGlow();
 
     this.placeRoomItems();
     this.createPlayerAnimations();
@@ -180,14 +99,46 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  createWindowGlow() {
+    const texture = this.textures.createCanvas("window-glow", 512, 256);
+    const context = texture.getContext();
+    const gradient = context.createRadialGradient(256, 0, 12, 256, 0, 256);
+    gradient.addColorStop(0, "rgba(156, 211, 255, 0.42)");
+    gradient.addColorStop(1, "rgba(156, 211, 255, 0)");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, 512, 256);
+    texture.refresh();
+
+    return this.add
+      .image(512, 190, "window-glow")
+      .setOrigin(0.5, 0)
+      .setDisplaySize(700, 400)
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setAlpha(0)
+      .setDepth(12);
+  }
+
+
   placeRoomItems() {
-    this.add.image(49, 187, "table").setOrigin(0).setDepth(1);
+    const ps4Size = ROOM_OBJECTS.find((obj) => obj.name === "PS4")?.size;
+    const screenSize = ROOM_OBJECTS.find((obj) => obj.name === "Screen")?.size;
+
     this.add.image(76, 76, "whiteboard").setOrigin(0).setDepth(1);
-    this.add.image(117, 176, "laptop").setOrigin(0).setDepth(2);
-    this.add.image(64, 208, "note").setOrigin(0).setDepth(2);
-    this.add.image(199, 220, "mouse").setOrigin(0).setDepth(2);
-    this.add.image(770, 195, "ps4").setOrigin(0).setDepth(1);
-    this.add.image(209, 400, "badminton").setOrigin(0).setDepth(1);
+    this.add.image(770, 195, "ps4").setOrigin(0).setDisplaySize(ps4Size.width, ps4Size.height).setDepth(1);
+    const screen = this.add.image(750, 75, "screen")
+      .setOrigin(0)
+      .setDisplaySize(screenSize.width, screenSize.height)
+      .setDepth(1);
+    const screenBounds = screen.getBounds();
+    this.add.graphics()
+      .lineStyle(4, 0x000000, 1)
+      .strokeRect(
+        screenBounds.x,
+        screenBounds.y,
+        screenBounds.width,
+        screenBounds.height,
+      )
+      .setDepth(2);
   }
 
   createPlayerAnimations() {
@@ -224,22 +175,16 @@ class GameScene extends Phaser.Scene {
       xDirection /= length;
       yDirection /= length;
       const distance = (PLAYER_SPEED * delta) / 1000;
-      const nextX = Phaser.Math.Clamp(
-        this.player.x + xDirection * distance,
-        ROOM_BOUNDS.left + PLAYER_COLLIDER.halfWidth,
-        ROOM_BOUNDS.right - PLAYER_COLLIDER.halfWidth,
-      );
+      const nextX = this.player.x + xDirection * distance;
       if (this.canOccupy(nextX, this.player.y)) {
         this.player.x = nextX;
       }
-      const nextY = Phaser.Math.Clamp(
-        this.player.y + yDirection * distance,
-        ROOM_BOUNDS.top + PLAYER_COLLIDER.halfHeight,
-        ROOM_BOUNDS.bottom - PLAYER_COLLIDER.halfHeight,
-      );
+      const nextY = this.player.y + yDirection * distance;
       if (this.canOccupy(this.player.x, nextY)) {
         this.player.y = nextY;
       }
+
+      // console.log('Player position:', this.player.x, this.player.y);
 
       if (Math.abs(xDirection) > Math.abs(yDirection)) {
         this.facing = xDirection > 0 ? "right" : "left";
@@ -251,15 +196,30 @@ class GameScene extends Phaser.Scene {
       this.player.anims.play(`${this.facing ?? "front"}-idle`, true);
     }
 
-    this.playerShadow.setPosition(this.player.x, this.player.y + 32);
+    this.playerShadow.setPosition(
+      this.player.x,
+      this.player.y + PLAYER_GROUND_OFFSET,
+    );
     this.updateInspection();
   }
 
   canOccupy(x, y) {
     const playerLeft = x - PLAYER_COLLIDER.halfWidth;
     const playerRight = x + PLAYER_COLLIDER.halfWidth;
-    const playerTop = y - PLAYER_COLLIDER.halfHeight;
-    const playerBottom = y + PLAYER_COLLIDER.halfHeight;
+    const groundY = y + PLAYER_GROUND_OFFSET;
+    const playerTop = groundY - PLAYER_COLLIDER.halfHeight;
+    const playerBottom = groundY + PLAYER_COLLIDER.halfHeight;
+
+    const isInsideRoom =
+      playerLeft >= ROOM_BOUNDS.left &&
+      playerRight <= ROOM_BOUNDS.right &&
+      playerTop >= ROOM_BOUNDS.top &&
+      playerBottom <= ROOM_BOUNDS.bottom;
+    if (!isInsideRoom) return false;
+
+    console.log('Player bounds:', { left: playerLeft, right: playerRight, top: playerTop, bottom: playerBottom });
+    console.log('Room bounds:', ROOM_BOUNDS);
+    console.log('-------------')
 
     return !ROOM_OBJECTS.some((object) => {
       if (!object.solid) return false;
