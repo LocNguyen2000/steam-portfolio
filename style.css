@@ -713,6 +713,10 @@ h2 {
     linear-gradient(130deg, #49375f, #292d50 60%, #152638);
 }
 
+.project-cdn .project-art {
+  position: relative;
+}
+
 .project-art img {
   position: absolute;
   inset: 0;
