@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#101820">
     <title>Tower Defense</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="../avatar.jpg" type="image/jpeg" />
+    <link rel="icon" href="../avatar.webp" type="image/webp" />
     <script src="game.js" defer></script>
   </head>
   <body>
@@ -46,74 +46,80 @@
           <button id="sound-button" class="sound-button" type="button" aria-label="Mute sound">Sound on</button>
         </header>
 
-        <div class="board-wrap">
-          <canvas id="board" width="1280" height="832" aria-label="Game map. Place towers on open tiles or deploy the Tank Ally on a road."></canvas>
-          <div id="level-start-warning" class="level-start-warning" role="status" hidden></div>
-          <div id="game-over" class="game-over" hidden>
-            <p class="eyebrow">DEFENSE FAILED</p>
-            <h2>Your base was overrun</h2>
-            <p>Final score <strong id="final-score">0</strong></p>
-            <button id="restart-button" class="primary-button">Play again</button>
+        <div class="game-layout">
+          <div class="board-wrap">
+            <canvas id="board" width="1280" height="832" aria-label="Game map. Place towers on open tiles or deploy the Tank Ally on a road."></canvas>
+            <div id="level-start-warning" class="level-start-warning" role="status" hidden></div>
+            <div id="game-over" class="game-over" hidden>
+              <p class="eyebrow">DEFENSE FAILED</p>
+              <h2>Your base was overrun</h2>
+              <p>Final score <strong id="final-score">0</strong></p>
+              <button id="restart-button" class="primary-button">Play again</button>
+            </div>
+            <div id="level-complete" class="game-over level-complete" hidden>
+              <p class="eyebrow">LEVEL CLEARED</p>
+              <h2 id="level-complete-title">Level complete!</h2>
+              <p id="level-complete-message"></p>
+              <button id="continue-button" class="primary-button">Continue</button>
+            </div>
           </div>
-          <div id="level-complete" class="game-over level-complete" hidden>
-            <p class="eyebrow">LEVEL CLEARED</p>
-            <h2 id="level-complete-title">Level complete!</h2>
-            <p id="level-complete-message"></p>
-            <button id="continue-button" class="primary-button">Continue</button>
+          <div class="game-sidebar">
+            <div class="toolbar" role="group" aria-label="Game controls">
+              <div class="tower-options" role="group" aria-label="Choose a tower to build">
+                <button class="tower-option" data-tower="normal" type="button" aria-pressed="false">
+                  <span class="tower-preview" aria-hidden="true">
+                    <img class="tower-preview-platform" src="assets/platform.webp" alt="">
+                    <img class="tower-preview-art" src="assets/tower-normal.webp" alt="">
+                  </span>
+                  <span><strong>Normal</strong><small>40 gold</small></span>
+                  <kbd>1</kbd>
+                </button>
+                <button class="tower-option" data-tower="sniper" type="button" aria-pressed="false">
+                  <span class="tower-preview" aria-hidden="true">
+                    <img class="tower-preview-platform" src="assets/platform.webp" alt="">
+                    <img class="tower-preview-art" src="assets/tower-sniper.webp" alt="">
+                  </span>
+                  <span><strong>Sniper</strong><small>100 gold</small></span>
+                  <kbd>2</kbd>
+                </button>
+                <button class="tower-option" data-tower="machine" type="button" aria-pressed="false">
+                  <span class="tower-preview" aria-hidden="true">
+                    <img class="tower-preview-platform" src="assets/platform.webp" alt="">
+                    <img class="tower-preview-art" src="assets/tower-machine.webp" alt="">
+                  </span>
+                  <span><strong>Machine gun</strong><small>80 gold</small></span>
+                  <kbd>3</kbd>
+                </button>
+              </div>
+              <button id="airstrike-button" class="airstrike-button" type="button" hidden aria-pressed="false">
+                <img src="assets/plane-transparent.webp" alt="">
+                <span><strong>Airstrike</strong><small id="airstrike-status">Ready</small></span>
+              </button>
+              <button id="tank-skill-button" class="tank-skill-button" type="button" hidden aria-pressed="false">
+                <img src="assets/tank.webp" alt="">
+                <span><strong>Tank Ally</strong><small id="tank-skill-status">Ready</small></span>
+                <kbd>4</kbd>
+              </button>
+              <p id="status-message" class="status-message">Choose a tower to start building.</p>
+            </div>
+            <div class="tower-info-rail">
+              <aside id="tower-info" class="tower-info" aria-label="Tower details" aria-live="polite" hidden>
+                <h2 id="tower-info-name"></h2>
+                <dl>
+                  <div><dt>Build cost</dt><dd id="tower-info-cost"></dd></div>
+                  <div><dt>Range</dt><dd id="tower-info-range"></dd></div>
+                  <div><dt>Damage</dt><dd id="tower-info-damage"></dd></div>
+                  <div><dt>Fire rate</dt><dd id="tower-info-speed"></dd></div>
+                </dl>
+                <div class="tower-upgrades" hidden>
+                  <button class="tower-upgrade" data-upgrade="machine" type="button"></button>
+                  <button class="tower-upgrade" data-upgrade="sniper" type="button"></button>
+                </div>
+              </aside>
+              <p class="tower-info-hint">Select a tower on the board to view its stats.</p>
+            </div>
           </div>
         </div>
-
-        <footer class="toolbar">
-          <div class="tower-options" role="group" aria-label="Choose a tower to build">
-            <button class="tower-option" data-tower="normal" type="button" aria-pressed="false">
-              <span class="tower-preview" aria-hidden="true">
-                <img class="tower-preview-platform" src="assets/platform.png" alt="">
-                <img class="tower-preview-art" src="assets/tower-normal.png" alt="">
-              </span>
-              <span><strong>Normal</strong><small>40 gold · balanced</small></span>
-              <kbd>1</kbd>
-            </button>
-            <button class="tower-option" data-tower="sniper" type="button" aria-pressed="false">
-              <span class="tower-preview" aria-hidden="true">
-                <img class="tower-preview-platform" src="assets/platform.png" alt="">
-                <img class="tower-preview-art" src="assets/tower-sniper.png" alt="">
-              </span>
-              <span><strong>Sniper</strong><small>100 gold · long range</small></span>
-              <kbd>2</kbd>
-            </button>
-            <button class="tower-option" data-tower="machine" type="button" aria-pressed="false">
-              <span class="tower-preview" aria-hidden="true">
-                <img class="tower-preview-platform" src="assets/platform.png" alt="">
-                <img class="tower-preview-art" src="assets/tower-machine.png" alt="">
-              </span>
-              <span><strong>Machine gun</strong><small>80 gold · rapid fire</small></span>
-              <kbd>3</kbd>
-            </button>
-          </div>
-          <button id="airstrike-button" class="airstrike-button" type="button" hidden aria-pressed="false">
-            <img src="assets/plane-transparent.png" alt="">
-            <span><strong>Airstrike</strong><small id="airstrike-status">Ready</small></span>
-          </button>
-          <button id="tank-skill-button" class="tank-skill-button" type="button" hidden aria-pressed="false">
-            <img src="assets/tank.png" alt="">
-            <span><strong>Tank Ally</strong><small id="tank-skill-status">Ready</small></span>
-            <kbd>4</kbd>
-          </button>
-          <aside id="tower-info" class="tower-info" aria-live="polite" hidden>
-            <h2 id="tower-info-name"></h2>
-            <dl>
-              <div><dt>Build cost</dt><dd id="tower-info-cost"></dd></div>
-              <div><dt>Range</dt><dd id="tower-info-range"></dd></div>
-              <div><dt>Damage</dt><dd id="tower-info-damage"></dd></div>
-              <div><dt>Fire rate</dt><dd id="tower-info-speed"></dd></div>
-            </dl>
-            <div class="tower-upgrades" hidden>
-              <button class="tower-upgrade" data-upgrade="machine" type="button"></button>
-              <button class="tower-upgrade" data-upgrade="sniper" type="button"></button>
-            </div>
-          </aside>
-          <p id="status-message" class="status-message">Choose a tower to start building.</p>
-        </footer>
       </section>
     </main>
   </body>

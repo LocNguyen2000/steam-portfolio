@@ -48,7 +48,7 @@ body {
   background:
     linear-gradient(90deg, rgb(5 13 23 / 78%), rgb(5 13 23 / 44%) 68%, rgb(5 13 23 / 60%)),
     linear-gradient(0deg, #0b1926 0%, rgb(11 25 38 / 15%) 75%),
-    url("./background.jpg") center 47% / cover;
+    url("./background.webp") center 47% / cover;
 }
 
 a {
@@ -87,7 +87,7 @@ a:focus-visible {
   background:
     linear-gradient(90deg, rgb(5 13 23 / 68%), rgb(5 13 23 / 34%) 68%, rgb(5 13 23 / 50%)),
     linear-gradient(0deg, rgb(16 35 55 / 82%) 0%, rgb(16 35 55 / 10%) 75%),
-    url("./background.jpg") center 47% / cover;
+    url("./background.webp") center 47% / cover;
 }
 
 .profile-cover::after {
@@ -1336,7 +1336,7 @@ h3 {
     padding: 20px;
     /* background:
       linear-gradient(rgb(8 17 29 / 80%), rgb(8 17 29 / 86%)),
-      url("./background.jpg") center / cover; */
+      url("./background.webp") center / cover; */
   }
 
   .panel {

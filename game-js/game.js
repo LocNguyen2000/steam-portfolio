@@ -127,23 +127,23 @@ const SPRITES = {
 };
 
 const assets = {
-  tiles: loadImage("assets/tile.jpg"),
-  plane: loadImage("assets/plane-transparent.png"),
-  airstrikeExplosion: loadImage("assets/airstrike-explosion.png"),
-  tank: loadImage("assets/tank.png"),
-  tankCannon: loadImage("assets/tank-cannon.png"),
+  tiles: loadImage("assets/tile.webp"),
+  plane: loadImage("assets/plane-transparent.webp"),
+  airstrikeExplosion: loadImage("assets/airstrike-explosion.webp"),
+  tank: loadImage("assets/tank.webp"),
+  tankCannon: loadImage("assets/tank-cannon.webp"),
   enemySprites: [
-    loadImage("assets/enemy_0-transparent.png"),
-    loadImage("assets/enemy_1-transparent.png"),
-    loadImage("assets/enemy_2-transparent.png"),
-    loadImage("assets/enemy_4-transparent.png")
+    loadImage("assets/enemy_0-transparent.webp"),
+    loadImage("assets/enemy_1-transparent.webp"),
+    loadImage("assets/enemy_2-transparent.webp"),
+    loadImage("assets/enemy_4-transparent.webp")
   ],
   towerArt: {
-    normal: loadImage("assets/tower-normal.png"),
-    sniper: loadImage("assets/tower-sniper.png"),
-    machine: loadImage("assets/tower-machine.png")
+    normal: loadImage("assets/tower-normal.webp"),
+    sniper: loadImage("assets/tower-sniper.webp"),
+    machine: loadImage("assets/tower-machine.webp")
   },
-  towerPlatform: loadImage("assets/platform.png"),
+  towerPlatform: loadImage("assets/platform.webp"),
   normalShot: loadAudio("assets/normal-cannon.wav"),
   sniperShot: loadAudio("assets/sniper-cannon.mp3"),
   machineShot: loadAudio("assets/shot.wav"),

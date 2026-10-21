@@ -36,7 +36,7 @@ const ROOM_OBJECTS = [
     bounds: { left: 300, right: 400, top: 200, bottom: 300 },
     inspectAt: { x: 750, y: 75 },
     size: { width: 140, height: 80 },
-    solid: true,
+    solid: false,
   }
 ];
 
