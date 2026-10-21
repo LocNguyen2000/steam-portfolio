@@ -91,12 +91,46 @@ class GameScene extends Phaser.Scene {
     this.inspectKey = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.E,
     );
+    this.moveTarget = null;
+    this.input.on("pointerdown", (pointer) => {
+      if (!this.mobileControls.matches) return;
+
+      const target = {
+        x: pointer.worldX,
+        y: pointer.worldY - PLAYER_GROUND_OFFSET,
+      };
+      if (!this.canOccupy(target.x, target.y)) return;
+
+      this.moveTarget = target;
+      this.showMoveRipple(pointer.worldX, pointer.worldY);
+    });
     this.status = document.querySelector("#status");
     this.inspection = document.querySelector("#inspection");
-    if (this.status) {
-      this.status.textContent =
-        "Move with WASD or arrow keys. Approach an item and press E to inspect.";
-    }
+    this.mobileControls = window.matchMedia("(max-width: 520px)");
+    this.updateControlHint = () => {
+      if (!this.status) return;
+      this.status.textContent = this.mobileControls.matches
+        ? "Tap the room to move. Approach an item to inspect."
+        : "Move with WASD or arrow keys. Approach an item and press E to inspect.";
+    };
+    this.mobileControls.addEventListener("change", this.updateControlHint);
+    this.updateControlHint();
+  }
+
+  showMoveRipple(x, y) {
+    const ripple = this.add
+      .circle(x, y, 8, 0x8ee3c0, 0.18)
+      .setStrokeStyle(2, 0xb8ffe2, 0.9)
+      .setDepth(8);
+
+    this.tweens.add({
+      targets: ripple,
+      scale: 4,
+      alpha: 0,
+      duration: 550,
+      ease: "Cubic.Out",
+      onComplete: () => ripple.destroy(),
+    });
   }
 
   createWindowGlow() {
@@ -168,13 +202,33 @@ class GameScene extends Phaser.Scene {
     const down = this.cursors.down.isDown || this.keys.S.isDown;
     let xDirection = Number(right) - Number(left);
     let yDirection = Number(down) - Number(up);
+    const isUsingKeyboard = xDirection !== 0 || yDirection !== 0;
+    let distanceToTarget = Infinity;
+
+    if (isUsingKeyboard) {
+      this.moveTarget = null;
+    } else if (this.moveTarget) {
+      xDirection = this.moveTarget.x - this.player.x;
+      yDirection = this.moveTarget.y - this.player.y;
+      distanceToTarget = Math.hypot(xDirection, yDirection);
+      if (distanceToTarget < 2) {
+        this.player.setPosition(this.moveTarget.x, this.moveTarget.y);
+        this.moveTarget = null;
+        xDirection = 0;
+        yDirection = 0;
+      }
+    }
+
     const isMoving = xDirection !== 0 || yDirection !== 0;
 
     if (isMoving) {
       const length = Math.hypot(xDirection, yDirection);
       xDirection /= length;
       yDirection /= length;
-      const distance = (PLAYER_SPEED * delta) / 1000;
+      const frameDistance = (PLAYER_SPEED * delta) / 1000;
+      const distance = Math.min(frameDistance, distanceToTarget);
+      const previousX = this.player.x;
+      const previousY = this.player.y;
       const nextX = this.player.x + xDirection * distance;
       if (this.canOccupy(nextX, this.player.y)) {
         this.player.x = nextX;
@@ -184,7 +238,12 @@ class GameScene extends Phaser.Scene {
         this.player.y = nextY;
       }
 
-      // console.log('Player position:', this.player.x, this.player.y);
+      if (this.player.x === previousX && this.player.y === previousY) {
+        this.moveTarget = null;
+      } else if (distanceToTarget <= frameDistance && this.moveTarget) {
+        this.player.setPosition(this.moveTarget.x, this.moveTarget.y);
+        this.moveTarget = null;
+      }
 
       if (Math.abs(xDirection) > Math.abs(yDirection)) {
         this.facing = xDirection > 0 ? "right" : "left";
@@ -216,10 +275,6 @@ class GameScene extends Phaser.Scene {
       playerTop >= ROOM_BOUNDS.top &&
       playerBottom <= ROOM_BOUNDS.bottom;
     if (!isInsideRoom) return false;
-
-    console.log('Player bounds:', { left: playerLeft, right: playerRight, top: playerTop, bottom: playerBottom });
-    console.log('Room bounds:', ROOM_BOUNDS);
-    console.log('-------------')
 
     return !ROOM_OBJECTS.some((object) => {
       if (!object.solid) return false;
